@@ -3,20 +3,22 @@ import { StyleSheet } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Colors } from '@/constants/theme';
 import { Metrics } from '@/constants/metrics';
+import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface PatientInfoRowProps {
   label: string;
   value: string | string[];
   isLast?: boolean;
+  valueStyle?: object;
 }
 
 export const PatientInfoRow = React.memo<PatientInfoRowProps>(({
   label,
   value,
   isLast = false,
+  valueStyle,
 }) => {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
@@ -33,7 +35,7 @@ export const PatientInfoRow = React.memo<PatientInfoRowProps>(({
       <ThemedText style={[styles.label, { color: colors.icon }]}>
         {label}
       </ThemedText>
-      <ThemedText style={styles.value} numberOfLines={3}>
+      <ThemedText style={[styles.value, valueStyle]} numberOfLines={3}>
         {renderValue()}
       </ThemedText>
     </ThemedView>

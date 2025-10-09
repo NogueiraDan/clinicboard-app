@@ -1,9 +1,9 @@
 import React, { forwardRef } from 'react';
 import {
+  StyleSheet,
+  Text,
   TextInput,
   View,
-  Text,
-  StyleSheet,
   type TextInputProps,
 } from 'react-native';
 
@@ -14,11 +14,12 @@ interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
   isRequired?: boolean;
+  labelStyle?: object;
 }
 
 export const Input = React.memo(
   forwardRef<TextInput, InputProps>(
-    ({ label, error, isRequired, style, ...props }, ref) => {
+  ({ label, error, isRequired, style, labelStyle, ...props }, ref) => {
       const colorScheme = useColorScheme() ?? 'light';
       const colors = Colors[colorScheme];
 
@@ -33,21 +34,29 @@ export const Input = React.memo(
       ];
 
       return (
-        <View style={styles.container}>
+        <View style={[styles.container, {
+          backgroundColor: '#000',
+          padding: 0,
+          marginBottom: 16,
+          width: '100%',
+          alignSelf: 'stretch',
+        }] }>
           {label && (
-            <Text style={[styles.label, { color: colors.text }]}>
+            <Text style={[
+              styles.label,
+              { color: '#fff', fontWeight: 'bold' },
+              labelStyle,
+            ]}>
               {label}
               {isRequired && <Text style={styles.required}> *</Text>}
             </Text>
           )}
-          
           <TextInput
             ref={ref}
-            style={inputStyles}
+            style={[inputStyles, { width: '100%', alignSelf: 'stretch', backgroundColor: '#000', color: '#fff' }]}
             placeholderTextColor={colors.icon}
             {...props}
           />
-          
           {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
       );
@@ -60,11 +69,15 @@ Input.displayName = 'Input';
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
+    backgroundColor: 'transparent',
+    width: '100%',
+    alignSelf: 'stretch',
   },
   label: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: 'bold',
     marginBottom: 8,
+    color: '#fff',
   },
   required: {
     color: '#FF6B6B',
@@ -76,6 +89,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     minHeight: 48,
+    backgroundColor: '#000',
+    color: '#fff',
+    width: '100%',
+    alignSelf: 'stretch',
   },
   errorText: {
     color: '#FF6B6B',

@@ -1,22 +1,21 @@
+import { router } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
+  Alert,
   FlatList,
+  RefreshControl,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
-  RefreshControl,
 } from 'react-native';
-import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Colors, Fonts } from '@/constants/theme';
 import { Metrics } from '@/constants/metrics';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Fonts } from '@/constants/theme';
 import { Patient } from '@/types';
 
 // Mock data - substituir por hook de dados reais
@@ -73,8 +72,6 @@ interface PatientItemProps {
 }
 
 const PatientItem = React.memo<PatientItemProps>(({ patient, onPress }) => {
-  const colorScheme = useColorScheme() ?? 'light';
-  const colors = Colors[colorScheme];
 
   const handlePress = useCallback(() => {
     onPress(patient.id);
@@ -86,26 +83,25 @@ const PatientItem = React.memo<PatientItemProps>(({ patient, onPress }) => {
 
   return (
     <TouchableOpacity
-      style={[styles.patientItem, { borderBottomColor: colors.icon }]}
+      style={[styles.patientItem, { borderBottomColor: '#fff' }]}
       onPress={handlePress}
       activeOpacity={Metrics.touchableOpacity}
     >
-      <ThemedView style={styles.patientInfo}>
-        <ThemedText type="defaultSemiBold" numberOfLines={1}>
+      <ThemedView style={[styles.patientInfo, { backgroundColor: '#000' }]}> 
+        <ThemedText type="defaultSemiBold" numberOfLines={1} style={{ color: '#fff' }}>
           {patient.name}
         </ThemedText>
-        <ThemedText style={[styles.patientDetail, { color: colors.icon }]} numberOfLines={1}>
+        <ThemedText style={[styles.patientDetail, { color: '#fff', opacity: 0.8 }]} numberOfLines={1}>
           {patient.email}
         </ThemedText>
-        <ThemedText style={[styles.patientDetail, { color: colors.icon }]} numberOfLines={1}>
+        <ThemedText style={[styles.patientDetail, { color: '#fff', opacity: 0.8 }]} numberOfLines={1}>
           {formattedPhone}
         </ThemedText>
       </ThemedView>
-      
       <IconSymbol
         name="chevron.right"
         size={Metrics.iconSize.md}
-        color={colors.icon}
+        color="#fff"
       />
     </TouchableOpacity>
   );
@@ -114,8 +110,7 @@ const PatientItem = React.memo<PatientItemProps>(({ patient, onPress }) => {
 PatientItem.displayName = 'PatientItem';
 
 export default function PatientsScreen() {
-  const colorScheme = useColorScheme() ?? 'light';
-  const colors = Colors[colorScheme];
+  // const colorScheme = useColorScheme() ?? 'light';
   const insets = useSafeAreaInsets();
   
   const [patients, setPatients] = useState<Patient[]>(MOCK_PATIENTS);
@@ -170,47 +165,47 @@ export default function PatientsScreen() {
       <IconSymbol
         name="person.2.fill"
         size={64}
-        color={colors.icon}
+        color="#fff"
         style={styles.emptyIcon}
       />
-      <ThemedText type="subtitle" style={styles.emptyTitle}>
+      <ThemedText type="subtitle" style={[styles.emptyTitle, { color: '#fff' }] }>
         {searchQuery ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
       </ThemedText>
-      <ThemedText style={[styles.emptySubtitle, { color: colors.icon }]}>
+      <ThemedText style={[styles.emptySubtitle, { color: '#fff', opacity: 0.7 }] }>
         {searchQuery
           ? 'Tente buscar com outros termos'
           : 'Cadastre seu primeiro paciente para começar'}
       </ThemedText>
     </ThemedView>
-  ), [colors.icon, searchQuery]);
+  ), [searchQuery]);
 
   const headerComponent = useMemo(() => (
     <ThemedView style={styles.header}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Pacientes</ThemedText>
+      <ThemedView style={[styles.titleContainer, { backgroundColor: '#000' }]}> 
+        <ThemedText type="title" style={{ color: '#fff' }}>Pacientes</ThemedText>
         <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: colors.tint }]}
+          style={[styles.addButton, { backgroundColor: '#000', borderWidth: 1, borderColor: '#fff2' }]}
           onPress={handleAddPatient}
           activeOpacity={Metrics.touchableOpacity}
         >
           <IconSymbol
             name="plus"
             size={Metrics.iconSize.md}
-            color="#FFFFFF"
+            color="#fff"
           />
         </TouchableOpacity>
       </ThemedView>
 
-      <ThemedView style={[styles.searchContainer, { borderColor: colors.icon }]}>
+      <ThemedView style={[styles.searchContainer, { borderColor: '#fff' }]}> 
         <IconSymbol
           name="magnifyingglass"
           size={Metrics.iconSize.md}
-          color={colors.icon}
+          color="#fff"
         />
         <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
+          style={[styles.searchInput, { color: '#fff' }]}
           placeholder="Buscar pacientes..."
-          placeholderTextColor={colors.icon}
+          placeholderTextColor="#fff9"
           value={searchQuery}
           onChangeText={setSearchQuery}
           autoCapitalize="none"
@@ -224,24 +219,24 @@ export default function PatientsScreen() {
             <IconSymbol
               name="xmark.circle.fill"
               size={Metrics.iconSize.md}
-              color={colors.icon}
+              color="#fff"
             />
           </TouchableOpacity>
         )}
       </ThemedView>
     </ThemedView>
-  ), [colors, searchQuery, handleAddPatient]);
+  ), [searchQuery, handleAddPatient]);
 
   if (isLoading) {
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={[styles.container, { backgroundColor: '#000' }] }>
         <LoadingSpinner />
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+    <ThemedView style={[styles.container, { backgroundColor: '#000', paddingTop: insets.top }]}> 
       <FlatList
         data={filteredPatients}
         renderItem={renderPatientItem}
@@ -252,8 +247,8 @@ export default function PatientsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.tint}
-            colors={[colors.tint]}
+            tintColor="#fff"
+            colors={["#fff"]}
           />
         }
         contentContainerStyle={styles.listContent}
@@ -279,6 +274,7 @@ const styles = StyleSheet.create({
   header: {
     padding: Metrics.padding.lg,
     gap: Metrics.margin.md,
+    backgroundColor: '#000',
   },
   titleContainer: {
     flexDirection: 'row',
@@ -300,6 +296,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Metrics.padding.md,
     paddingVertical: Metrics.padding.sm,
     gap: Metrics.margin.sm,
+    backgroundColor: '#000',
+    borderColor: '#fff2',
   },
   searchInput: {
     flex: 1,
@@ -316,10 +314,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: Metrics.padding.lg,
     paddingVertical: Metrics.padding.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
+    backgroundColor: '#000',
   },
   patientInfo: {
     flex: 1,
     gap: 4,
+    backgroundColor: '#000',
   },
   patientDetail: {
     fontSize: Metrics.fontSize.sm,

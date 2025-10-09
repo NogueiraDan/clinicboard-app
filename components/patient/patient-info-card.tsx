@@ -4,8 +4,8 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
 import { Metrics } from '@/constants/metrics';
+import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 interface PatientInfoCardProps {
@@ -14,6 +14,9 @@ interface PatientInfoCardProps {
   icon?: string;
   onEdit?: () => void;
   isEditable?: boolean;
+  cardStyle?: object;
+  titleStyle?: object;
+  iconColor?: string;
 }
 
 export const PatientInfoCard = React.memo<PatientInfoCardProps>(({
@@ -22,22 +25,25 @@ export const PatientInfoCard = React.memo<PatientInfoCardProps>(({
   icon,
   onEdit,
   isEditable = false,
+  cardStyle,
+  titleStyle,
+  iconColor,
 }) => {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   return (
-    <ThemedView style={[styles.card, { borderColor: colors.icon + '30' }]}>
+    <ThemedView style={[styles.card, { borderColor: colors.icon + '30' }, cardStyle]}>
       <ThemedView style={styles.cardHeader}>
         <ThemedView style={styles.titleContainer}>
           {icon && (
             <IconSymbol
               name={icon as any}
               size={Metrics.iconSize.md}
-              color={colors.tint}
+              color={iconColor || colors.tint}
             />
           )}
-          <ThemedText type="defaultSemiBold" style={styles.cardTitle}>
+          <ThemedText type="defaultSemiBold" style={[styles.cardTitle, titleStyle]}>
             {title}
           </ThemedText>
         </ThemedView>

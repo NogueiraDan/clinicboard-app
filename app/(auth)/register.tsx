@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import { router } from "expo-router";
+import React, { useState } from "react";
 import {
-  StyleSheet,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
-} from 'react-native';
-import { router } from 'expo-router';
+  StyleSheet,
+  View,
+} from "react-native";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { useAuth } from '@/providers/auth-provider';
+import { ThemedText } from "@/components/themed-text";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAuth } from "@/providers/auth-provider";
 
 interface RegisterForm {
   name: string;
@@ -95,93 +95,100 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <ThemedView style={styles.header}>
+        <View style={styles.innerContent}>
           <ThemedText type="title" style={styles.title}>
             Criar Conta
           </ThemedText>
           <ThemedText style={styles.subtitle}>
             Preencha os dados para criar sua conta
           </ThemedText>
-        </ThemedView>
-
-        <ThemedView style={styles.form}>
-          <Input
-            label="Nome"
-            value={form.name}
-            onChangeText={(name) => setForm(prev => ({ ...prev, name }))}
-            placeholder="Digite seu nome completo"
-            autoCapitalize="words"
-            autoComplete="name"
-            error={errors.name}
-            isRequired
-          />
-
-          <Input
-            label="Email"
-            value={form.email}
-            onChangeText={(email) => setForm(prev => ({ ...prev, email }))}
-            placeholder="Digite seu email"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            error={errors.email}
-            isRequired
-          />
-
-          <Input
-            label="Senha"
-            value={form.password}
-            onChangeText={(password) => setForm(prev => ({ ...prev, password }))}
-            placeholder="Digite sua senha"
-            secureTextEntry
-            autoComplete="new-password"
-            error={errors.password}
-            isRequired
-          />
-
-          <Input
-            label="Confirmar Senha"
-            value={form.confirmPassword}
-            onChangeText={(confirmPassword) => 
-              setForm(prev => ({ ...prev, confirmPassword }))
-            }
-            placeholder="Confirme sua senha"
-            secureTextEntry
-            autoComplete="new-password"
-            error={errors.confirmPassword}
-            isRequired
-          />
-
-          <Button
-            title="Criar Conta"
-            onPress={handleRegister}
-            isLoading={isLoading}
-            disabled={isLoading}
-            variant="primary"
-          />
-
-          <Button
-            title="Já tem uma conta? Entrar"
-            onPress={navigateToLogin}
-            variant="outline"
-            disabled={isLoading}
-          />
-
-          <Button
-            title="Voltar"
-            onPress={navigateBack}
-            variant="secondary"
-            disabled={isLoading}
-          />
-        </ThemedView>
+          <View style={styles.form}>
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>Nome</ThemedText>
+              <Input
+                value={form.name}
+                onChangeText={(name) => setForm((prev) => ({ ...prev, name }))}
+                placeholder="Digite seu nome completo"
+                autoCapitalize="words"
+                autoComplete="name"
+                error={errors.name}
+                isRequired
+                style={styles.input}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>Email</ThemedText>
+              <Input
+                value={form.email}
+                onChangeText={(email) => setForm((prev) => ({ ...prev, email }))}
+                placeholder="Digite seu email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                error={errors.email}
+                isRequired
+                style={styles.input}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>Senha</ThemedText>
+              <Input
+                value={form.password}
+                onChangeText={(password) => setForm((prev) => ({ ...prev, password }))}
+                placeholder="Digite sua senha"
+                secureTextEntry
+                autoComplete="new-password"
+                error={errors.password}
+                isRequired
+                style={styles.input}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>Confirmar Senha</ThemedText>
+              <Input
+                value={form.confirmPassword}
+                onChangeText={(confirmPassword) => setForm((prev) => ({ ...prev, confirmPassword }))}
+                placeholder="Confirme sua senha"
+                secureTextEntry
+                autoComplete="new-password"
+                error={errors.confirmPassword}
+                isRequired
+                style={styles.input}
+              />
+            </View>
+            <Button
+              title="Criar Conta"
+              onPress={handleRegister}
+              isLoading={isLoading}
+              disabled={isLoading}
+              style={styles.buttonWeb}
+              textStyle={{ color: '#000', fontWeight: 'bold', fontSize: 20 }}
+            />
+            <ThemedText
+              style={styles.linkPrimaryWeb}
+              onPress={navigateToLogin}
+              accessibilityRole="link"
+              accessibilityLabel="Já tem uma conta? Entrar"
+            >
+              Já tem uma conta? Entrar
+            </ThemedText>
+            <ThemedText
+              style={styles.linkSecondaryWeb}
+              onPress={navigateBack}
+              accessibilityRole="link"
+              accessibilityLabel="Voltar"
+            >
+              Voltar
+            </ThemedText>
+          </View>
+        </View>
       </ScrollView>
-
       {isLoading && <LoadingSpinner overlay />}
     </KeyboardAvoidingView>
   );
@@ -190,24 +197,102 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 24,
-    paddingTop: 80,
+    paddingHorizontal: 24,
+    paddingTop: 48,
+    paddingBottom: 32,
   },
-  header: {
-    marginBottom: 32,
+  innerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
   },
   title: {
-    textAlign: 'center',
+    textAlign: "left",
+    fontSize: 38,
+    fontWeight: Platform.OS === "ios" ? "800" : "bold",
+    color: "#fff",
     marginBottom: 8,
+    lineHeight: 44,
+    letterSpacing: 0.2,
+    alignSelf: "flex-start",
   },
   subtitle: {
-    textAlign: 'center',
-    opacity: 0.7,
+    color: "#fff",
+    fontSize: 17,
+    marginBottom: 24,
+    opacity: 0.85,
+    textAlign: "left",
+    alignSelf: "flex-start",
   },
   form: {
-    gap: 16,
+    width: "100%",
+    maxWidth: 420,
+    alignSelf: "center",
+    backgroundColor: "transparent",
+    padding: 0,
+    margin: 0,
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  inputGroup: {
+    marginBottom: 12,
+    width: "100%",
+  },
+  input: {
+    width: "100%",
+    backgroundColor: "#F3F6FF",
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: "#222",
+    borderWidth: 0,
+    marginBottom: 8,
+    alignSelf: "stretch",
+  },
+  inputLabel: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginBottom: 4,
+    marginLeft: 2,
+  },
+  buttonWeb: {
+    backgroundColor: "#E6E6E6",
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 8,
+    marginBottom: 24,
+    alignSelf: "stretch",
+    width: "100%",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  linkPrimaryWeb: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 17,
+    textDecorationLine: "none",
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    marginBottom: 8,
+    alignSelf: "flex-start",
+  },
+  linkSecondaryWeb: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "bold",
+    textDecorationLine: "none",
+    opacity: 1,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    alignSelf: "flex-start",
   },
 });

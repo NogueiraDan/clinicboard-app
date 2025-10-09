@@ -1,49 +1,47 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import { router } from "expo-router";
+import React, { useCallback, useMemo, useState } from "react";
 import {
-  StyleSheet,
-  ScrollView,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  ScrollView,
+  StyleSheet,
   TouchableOpacity,
-} from 'react-native';
-import { router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Colors } from '@/constants/theme';
-import { Metrics } from '@/constants/metrics';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useFormValidation } from '@/hooks/use-form-validation';
-import { PatientFormData } from '@/types';
-import { validationRules } from '@/utils/validation';
-import { formatters } from '@/utils/formatters';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Button } from "@/components/ui/button";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { Input } from "@/components/ui/input";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Metrics } from "@/constants/metrics";
+import { useFormValidation } from "@/hooks/use-form-validation";
+import { PatientFormData } from "@/types";
+import { formatters } from "@/utils/formatters";
+import { validationRules } from "@/utils/validation";
 
 const INITIAL_VALUES: PatientFormData = {
-  name: '',
-  email: '',
-  phone: '',
-  birthDate: '',
+  name: "",
+  email: "",
+  phone: "",
+  birthDate: "",
   address: {
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
-    state: '',
-    zipCode: '',
+    street: "",
+    number: "",
+    complement: "",
+    neighborhood: "",
+    city: "",
+    state: "",
+    zipCode: "",
   },
-  medicalHistory: '',
-  allergies: '',
+  medicalHistory: "",
+  allergies: "",
   emergencyContact: {
-    name: '',
-    phone: '',
-    relationship: '',
+    name: "",
+    phone: "",
+    relationship: "",
   },
 };
 
@@ -52,15 +50,15 @@ const VALIDATION_RULES = {
   email: [validationRules.required, validationRules.email],
   phone: [validationRules.required, validationRules.phone],
   birthDate: [validationRules.required],
-  'address.street': [validationRules.required],
-  'address.number': [validationRules.required],
-  'address.neighborhood': [validationRules.required],
-  'address.city': [validationRules.required],
-  'address.state': [validationRules.required],
-  'address.zipCode': [validationRules.required, validationRules.zipCode],
-  'emergencyContact.name': [validationRules.required],
-  'emergencyContact.phone': [validationRules.required, validationRules.phone],
-  'emergencyContact.relationship': [validationRules.required],
+  "address.street": [validationRules.required],
+  "address.number": [validationRules.required],
+  "address.neighborhood": [validationRules.required],
+  "address.city": [validationRules.required],
+  "address.state": [validationRules.required],
+  "address.zipCode": [validationRules.required, validationRules.zipCode],
+  "emergencyContact.name": [validationRules.required],
+  "emergencyContact.phone": [validationRules.required, validationRules.phone],
+  "emergencyContact.relationship": [validationRules.required],
 };
 
 interface SectionHeaderProps {
@@ -68,27 +66,44 @@ interface SectionHeaderProps {
   subtitle?: string;
 }
 
-const SectionHeader = React.memo<SectionHeaderProps>(({ title, subtitle }) => {
-  const colorScheme = useColorScheme() ?? 'light';
-  const colors = Colors[colorScheme];
+const SectionHeader = React.memo<SectionHeaderProps>(({ title, subtitle }) => (
+  <ThemedView
+    style={[
+      styles.sectionHeader,
+      { backgroundColor: "#000", paddingHorizontal: 0, paddingVertical: 0 },
+    ]}
+  >
+    <ThemedText
+      style={{
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 18,
+        marginBottom: 2,
+      }}
+    >
+      {title}
+    </ThemedText>
+    {subtitle && (
+      <ThemedText style={{ color: "#fff", opacity: 0.7, fontSize: 14 }}>
+        {subtitle}
+      </ThemedText>
+    )}
+  </ThemedView>
+));
 
-  return (
-    <ThemedView style={styles.sectionHeader}>
-      <ThemedText type="subtitle">{title}</ThemedText>
-      {subtitle && (
-        <ThemedText style={[styles.sectionSubtitle, { color: colors.icon }]}>
-          {subtitle}
-        </ThemedText>
-      )}
-    </ThemedView>
-  );
-});
-
-SectionHeader.displayName = 'SectionHeader';
+SectionHeader.displayName = "SectionHeader";
 
 export default function PatientRegistrationScreen() {
-  const colorScheme = useColorScheme() ?? 'light';
-  const colors = Colors[colorScheme];
+  // Forçar padrão escuro
+  const colors = {
+    background: "#000",
+    text: "#fff",
+    icon: "#fff",
+    border: "#fff2",
+    placeholder: "#fff9",
+    primary: "#0096FF",
+    danger: "#FF6B6B",
+  };
   const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -97,76 +112,95 @@ export default function PatientRegistrationScreen() {
     errors,
     touched,
     setValue,
-    setFieldTouched,
+    setFieldTouched: setFieldTouchedRaw,
     validateForm,
     resetForm,
   } = useFormValidation(INITIAL_VALUES, VALIDATION_RULES);
 
-  const handleInputChange = useCallback((field: keyof PatientFormData | string, value: string) => {
-    if (field.includes('.')) {
-      // Handle nested fields
-      const [parent, child] = field.split('.');
-      const parentValue = values[parent as keyof PatientFormData];
-      
-      if (typeof parentValue === 'object' && parentValue !== null) {
-        setValue(parent as keyof PatientFormData, {
-          ...parentValue,
-          [child]: value,
-        });
-      }
-    } else {
-      setValue(field as keyof PatientFormData, value);
-    }
-  }, [values, setValue]);
+  // Permitir campos aninhados (string) para setFieldTouched
+  const setFieldTouched = useCallback(
+    (field: keyof PatientFormData | string) => {
+      setFieldTouchedRaw(field as any);
+    },
+    [setFieldTouchedRaw]
+  );
 
-  const getFieldValue = useCallback((field: string): string => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      const parentValue = values[parent as keyof PatientFormData];
-      
-      if (typeof parentValue === 'object' && parentValue !== null) {
-        return String((parentValue as any)[child] || '');
-      }
-    }
-    
-    return String(values[field as keyof PatientFormData] || '');
-  }, [values]);
+  const handleInputChange = useCallback(
+    (field: keyof PatientFormData | string, value: string) => {
+      if (field.includes(".")) {
+        // Handle nested fields
+        const [parent, child] = field.split(".");
+        const parentValue = values[parent as keyof PatientFormData];
 
-  const getFieldError = useCallback((field: string): string | undefined => {
-    if (field.includes('.')) {
-      return errors[field as keyof typeof errors];
-    }
-    
-    return errors[field as keyof PatientFormData];
-  }, [errors]);
+        if (typeof parentValue === "object" && parentValue !== null) {
+          setValue(parent as keyof PatientFormData, {
+            ...parentValue,
+            [child]: value,
+          });
+        }
+      } else {
+        setValue(field as keyof PatientFormData, value);
+      }
+    },
+    [values, setValue]
+  );
+
+  const getFieldValue = useCallback(
+    (field: string): string => {
+      if (field.includes(".")) {
+        const [parent, child] = field.split(".");
+        const parentValue = values[parent as keyof PatientFormData];
+
+        if (typeof parentValue === "object" && parentValue !== null) {
+          return String((parentValue as any)[child] || "");
+        }
+      }
+
+      return String(values[field as keyof PatientFormData] || "");
+    },
+    [values]
+  );
+
+  const getFieldError = useCallback(
+    (field: string): string | undefined => {
+      if (field.includes(".")) {
+        return errors[field as keyof typeof errors];
+      }
+
+      return errors[field as keyof PatientFormData];
+    },
+    [errors]
+  );
 
   const handleSubmit = useCallback(async () => {
     if (!validateForm()) {
-      Alert.alert('Erro de Validação', 'Por favor, corrija os erros no formulário.');
+      Alert.alert(
+        "Erro de Validação",
+        "Por favor, corrija os erros no formulário."
+      );
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       // Simular chamada de API
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      Alert.alert(
-        'Sucesso!',
-        'Paciente cadastrado com sucesso.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              resetForm();
-              router.back();
-            },
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      Alert.alert("Sucesso!", "Paciente cadastrado com sucesso.", [
+        {
+          text: "OK",
+          onPress: () => {
+            resetForm();
+            router.back();
           },
-        ]
-      );
+        },
+      ]);
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível cadastrar o paciente. Tente novamente.');
+      Alert.alert(
+        "Erro",
+        "Não foi possível cadastrar o paciente. Tente novamente."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -174,38 +208,43 @@ export default function PatientRegistrationScreen() {
 
   const handleCancel = useCallback(() => {
     Alert.alert(
-      'Cancelar Cadastro',
-      'Tem certeza que deseja cancelar? Todos os dados preenchidos serão perdidos.',
+      "Cancelar Cadastro",
+      "Tem certeza que deseja cancelar? Todos os dados preenchidos serão perdidos.",
       [
-        { text: 'Continuar Editando', style: 'cancel' },
+        { text: "Continuar Editando", style: "cancel" },
         {
-          text: 'Cancelar',
-          style: 'destructive',
+          text: "Cancelar",
+          style: "destructive",
           onPress: () => router.back(),
         },
       ]
     );
   }, []);
 
-  const formattedPhone = useMemo(() => 
-    formatters.phone(getFieldValue('phone')), 
+  const formattedPhone = useMemo(
+    () => formatters.phone(getFieldValue("phone")),
     [getFieldValue]
   );
 
-  const formattedEmergencyPhone = useMemo(() => 
-    formatters.phone(getFieldValue('emergencyContact.phone')), 
+  const formattedEmergencyPhone = useMemo(
+    () => formatters.phone(getFieldValue("emergencyContact.phone")),
     [getFieldValue]
   );
 
-  const formattedZipCode = useMemo(() => 
-    formatters.zipCode(getFieldValue('address.zipCode')), 
+  const formattedZipCode = useMemo(
+    () => formatters.zipCode(getFieldValue("address.zipCode")),
     [getFieldValue]
   );
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+    <ThemedView
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, paddingTop: insets.top },
+      ]}
+    >
       {/* Header */}
-      <ThemedView style={styles.header}>
+      <ThemedView style={[styles.header, { backgroundColor: "#000" }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={handleCancel}
@@ -217,12 +256,20 @@ export default function PatientRegistrationScreen() {
             color={colors.icon}
           />
         </TouchableOpacity>
-        
         <ThemedView style={styles.headerContent}>
-          <ThemedText type="title" numberOfLines={1}>
+          <ThemedText
+            type="title"
+            numberOfLines={1}
+            style={{ color: colors.text }}
+          >
             Novo Paciente
           </ThemedText>
-          <ThemedText style={[styles.headerSubtitle, { color: colors.icon }]}>
+          <ThemedText
+            style={[
+              styles.headerSubtitle,
+              { color: colors.text, opacity: 0.7 },
+            ]}
+          >
             Preencha as informações do paciente
           </ThemedText>
         </ThemedView>
@@ -230,230 +277,401 @@ export default function PatientRegistrationScreen() {
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
       >
         <ScrollView
-          style={styles.scrollContainer}
+          style={{ flex: 1, backgroundColor: colors.background }}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           {/* Informações Pessoais */}
-          <SectionHeader 
+          <SectionHeader
             title="Informações Pessoais"
             subtitle="Dados básicos do paciente"
           />
-          
           <Input
             label="Nome Completo"
-            value={getFieldValue('name')}
-            onChangeText={(value) => handleInputChange('name', value)}
-            onBlur={() => setFieldTouched('name')}
+            value={getFieldValue("name")}
+            onChangeText={(value) => handleInputChange("name", value)}
+            onBlur={() => setFieldTouched("name")}
             placeholder="Digite o nome completo"
             autoCapitalize="words"
-            error={getFieldError('name')}
+            error={getFieldError("name")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
           <Input
             label="Email"
-            value={getFieldValue('email')}
-            onChangeText={(value) => handleInputChange('email', value)}
-            onBlur={() => setFieldTouched('email')}
+            value={getFieldValue("email")}
+            onChangeText={(value) => handleInputChange("email", value)}
+            onBlur={() => setFieldTouched("email")}
             placeholder="exemplo@email.com"
             keyboardType="email-address"
             autoCapitalize="none"
-            error={getFieldError('email')}
+            error={getFieldError("email")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
           <Input
             label="Telefone"
             value={formattedPhone}
-            onChangeText={(value) => handleInputChange('phone', value)}
-            onBlur={() => setFieldTouched('phone')}
+            onChangeText={(value) => handleInputChange("phone", value)}
+            onBlur={() => setFieldTouched("phone")}
             placeholder="(11) 99999-9999"
             keyboardType="phone-pad"
-            error={getFieldError('phone')}
+            error={getFieldError("phone")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
           <Input
             label="Data de Nascimento"
-            value={getFieldValue('birthDate')}
-            onChangeText={(value) => handleInputChange('birthDate', value)}
-            onBlur={() => setFieldTouched('birthDate')}
+            value={getFieldValue("birthDate")}
+            onChangeText={(value) => handleInputChange("birthDate", value)}
+            onBlur={() => setFieldTouched("birthDate")}
             placeholder="DD/MM/AAAA"
             keyboardType="numeric"
-            error={getFieldError('birthDate')}
+            error={getFieldError("birthDate")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
           {/* Endereço */}
-          <SectionHeader 
+          <SectionHeader
             title="Endereço"
             subtitle="Endereço residencial do paciente"
           />
-
           <Input
             label="CEP"
             value={formattedZipCode}
-            onChangeText={(value) => handleInputChange('address.zipCode', value)}
-            onBlur={() => setFieldTouched('address.zipCode')}
+            onChangeText={(value) =>
+              handleInputChange("address.zipCode", value)
+            }
+            onBlur={() => setFieldTouched("address.zipCode")}
             placeholder="12345-678"
             keyboardType="numeric"
-            error={getFieldError('address.zipCode')}
+            error={getFieldError("address.zipCode")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
-          <ThemedView style={styles.row}>
-            <ThemedView style={[styles.inputContainer, { flex: 2 }]}>
+          <ThemedView
+            style={[
+              styles.row,
+              {
+                backgroundColor: "#000",
+                paddingHorizontal: 0,
+                marginBottom: 0,
+                borderWidth: 0,
+                shadowColor: "transparent",
+                elevation: 0,
+              },
+            ]}
+          >
+            <ThemedView
+              style={[
+                styles.inputContainer,
+                {
+                  flex: 2,
+                  backgroundColor: "transparent",
+                  shadowColor: "transparent",
+                  elevation: 0,
+                },
+              ]}
+            >
               <Input
                 label="Rua"
-                value={getFieldValue('address.street')}
-                onChangeText={(value) => handleInputChange('address.street', value)}
-                onBlur={() => setFieldTouched('address.street')}
+                value={getFieldValue("address.street")}
+                onChangeText={(value) =>
+                  handleInputChange("address.street", value)
+                }
+                onBlur={() => setFieldTouched("address.street")}
                 placeholder="Nome da rua"
-                error={getFieldError('address.street')}
+                error={getFieldError("address.street")}
                 isRequired
+                style={{
+                  backgroundColor: colors.background,
+                  color: colors.text,
+                  borderColor: colors.border,
+                }}
+                placeholderTextColor={colors.placeholder}
               />
             </ThemedView>
-            
-            <ThemedView style={[styles.inputContainer, { flex: 1 }]}>
+            <ThemedView
+              style={[
+                styles.inputContainer,
+                {
+                  flex: 1,
+                  backgroundColor: "transparent",
+                  shadowColor: "transparent",
+                  elevation: 0,
+                },
+              ]}
+            >
               <Input
                 label="Número"
-                value={getFieldValue('address.number')}
-                onChangeText={(value) => handleInputChange('address.number', value)}
-                onBlur={() => setFieldTouched('address.number')}
+                value={getFieldValue("address.number")}
+                onChangeText={(value) =>
+                  handleInputChange("address.number", value)
+                }
+                onBlur={() => setFieldTouched("address.number")}
                 placeholder="123"
                 keyboardType="numeric"
-                error={getFieldError('address.number')}
+                error={getFieldError("address.number")}
                 isRequired
+                style={{
+                  backgroundColor: colors.background,
+                  color: colors.text,
+                  borderColor: colors.border,
+                }}
+                placeholderTextColor={colors.placeholder}
               />
             </ThemedView>
           </ThemedView>
-
           <Input
             label="Complemento"
-            value={getFieldValue('address.complement')}
-            onChangeText={(value) => handleInputChange('address.complement', value)}
+            value={getFieldValue("address.complement")}
+            onChangeText={(value) =>
+              handleInputChange("address.complement", value)
+            }
             placeholder="Apto, sala, bloco (opcional)"
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
           <Input
             label="Bairro"
-            value={getFieldValue('address.neighborhood')}
-            onChangeText={(value) => handleInputChange('address.neighborhood', value)}
-            onBlur={() => setFieldTouched('address.neighborhood')}
+            value={getFieldValue("address.neighborhood")}
+            onChangeText={(value) =>
+              handleInputChange("address.neighborhood", value)
+            }
+            onBlur={() => setFieldTouched("address.neighborhood")}
             placeholder="Nome do bairro"
-            error={getFieldError('address.neighborhood')}
+            error={getFieldError("address.neighborhood")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
-          <ThemedView style={styles.row}>
-            <ThemedView style={[styles.inputContainer, { flex: 2 }]}>
+          <ThemedView
+            style={[
+              styles.row,
+              {
+                backgroundColor: "#000",
+                paddingHorizontal: 0,
+                marginBottom: 0,
+                borderWidth: 0,
+                shadowColor: "transparent",
+                elevation: 0,
+              },
+            ]}
+          >
+            <ThemedView
+              style={[
+                styles.inputContainer,
+                {
+                  flex: 2,
+                  backgroundColor: "transparent",
+                  shadowColor: "transparent",
+                  elevation: 0,
+                },
+              ]}
+            >
               <Input
                 label="Cidade"
-                value={getFieldValue('address.city')}
-                onChangeText={(value) => handleInputChange('address.city', value)}
-                onBlur={() => setFieldTouched('address.city')}
+                value={getFieldValue("address.city")}
+                onChangeText={(value) =>
+                  handleInputChange("address.city", value)
+                }
+                onBlur={() => setFieldTouched("address.city")}
                 placeholder="Nome da cidade"
-                error={getFieldError('address.city')}
+                error={getFieldError("address.city")}
                 isRequired
+                style={{
+                  backgroundColor: colors.background,
+                  color: colors.text,
+                  borderColor: colors.border,
+                }}
+                placeholderTextColor={colors.placeholder}
               />
             </ThemedView>
-            
-            <ThemedView style={[styles.inputContainer, { flex: 1 }]}>
+            <ThemedView
+              style={[
+                styles.inputContainer,
+                {
+                  flex: 1,
+                  backgroundColor: "transparent",
+                  shadowColor: "transparent",
+                  elevation: 0,
+                },
+              ]}
+            >
               <Input
                 label="Estado"
-                value={getFieldValue('address.state')}
-                onChangeText={(value) => handleInputChange('address.state', value)}
-                onBlur={() => setFieldTouched('address.state')}
+                value={getFieldValue("address.state")}
+                onChangeText={(value) =>
+                  handleInputChange("address.state", value)
+                }
+                onBlur={() => setFieldTouched("address.state")}
                 placeholder="SP"
                 autoCapitalize="characters"
                 maxLength={2}
-                error={getFieldError('address.state')}
+                error={getFieldError("address.state")}
                 isRequired
+                style={{
+                  backgroundColor: colors.background,
+                  color: colors.text,
+                  borderColor: colors.border,
+                }}
+                placeholderTextColor={colors.placeholder}
               />
             </ThemedView>
           </ThemedView>
-
           {/* Contato de Emergência */}
-          <SectionHeader 
+          <SectionHeader
             title="Contato de Emergência"
             subtitle="Pessoa para contatar em caso de emergência"
           />
-
           <Input
             label="Nome"
-            value={getFieldValue('emergencyContact.name')}
-            onChangeText={(value) => handleInputChange('emergencyContact.name', value)}
-            onBlur={() => setFieldTouched('emergencyContact.name')}
+            value={getFieldValue("emergencyContact.name")}
+            onChangeText={(value) =>
+              handleInputChange("emergencyContact.name", value)
+            }
+            onBlur={() => setFieldTouched("emergencyContact.name")}
             placeholder="Nome do contato"
             autoCapitalize="words"
-            error={getFieldError('emergencyContact.name')}
+            error={getFieldError("emergencyContact.name")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
           <Input
             label="Telefone"
             value={formattedEmergencyPhone}
-            onChangeText={(value) => handleInputChange('emergencyContact.phone', value)}
-            onBlur={() => setFieldTouched('emergencyContact.phone')}
+            onChangeText={(value) =>
+              handleInputChange("emergencyContact.phone", value)
+            }
+            onBlur={() => setFieldTouched("emergencyContact.phone")}
             placeholder="(11) 99999-9999"
             keyboardType="phone-pad"
-            error={getFieldError('emergencyContact.phone')}
+            error={getFieldError("emergencyContact.phone")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
           <Input
             label="Parentesco"
-            value={getFieldValue('emergencyContact.relationship')}
-            onChangeText={(value) => handleInputChange('emergencyContact.relationship', value)}
-            onBlur={() => setFieldTouched('emergencyContact.relationship')}
+            value={getFieldValue("emergencyContact.relationship")}
+            onChangeText={(value) =>
+              handleInputChange("emergencyContact.relationship", value)
+            }
+            onBlur={() => setFieldTouched("emergencyContact.relationship")}
             placeholder="Ex: Mãe, Pai, Cônjuge"
             autoCapitalize="words"
-            error={getFieldError('emergencyContact.relationship')}
+            error={getFieldError("emergencyContact.relationship")}
             isRequired
+            style={{
+              backgroundColor: colors.background,
+              color: colors.text,
+              borderColor: colors.border,
+            }}
+            placeholderTextColor={colors.placeholder}
           />
-
           {/* Informações Médicas */}
-          <SectionHeader 
+          <SectionHeader
             title="Informações Médicas"
             subtitle="Histórico médico e alergias (opcional)"
           />
-
           <Input
             label="Histórico Médico"
-            value={getFieldValue('medicalHistory')}
-            onChangeText={(value) => handleInputChange('medicalHistory', value)}
+            value={getFieldValue("medicalHistory")}
+            onChangeText={(value) => handleInputChange("medicalHistory", value)}
             placeholder="Descreva o histórico médico relevante"
             multiline
             numberOfLines={3}
-            style={styles.textArea}
+            style={[
+              styles.textArea,
+              {
+                backgroundColor: colors.background,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            placeholderTextColor={colors.placeholder}
           />
-
           <Input
             label="Alergias"
-            value={getFieldValue('allergies')}
-            onChangeText={(value) => handleInputChange('allergies', value)}
+            value={getFieldValue("allergies")}
+            onChangeText={(value) => handleInputChange("allergies", value)}
             placeholder="Liste as alergias conhecidas"
             multiline
             numberOfLines={2}
-            style={styles.textArea}
+            style={[
+              styles.textArea,
+              {
+                backgroundColor: colors.background,
+                color: colors.text,
+                borderColor: colors.border,
+              },
+            ]}
+            placeholderTextColor={colors.placeholder}
           />
         </ScrollView>
-
         {/* Footer com botões */}
-        <ThemedView style={[styles.footer, { borderTopColor: colors.icon }]}>
+        <ThemedView
+          style={[
+            styles.footer,
+            {
+              borderTopColor: colors.border,
+              backgroundColor: colors.background,
+            },
+          ]}
+        >
           <Button
             title="Cancelar"
             onPress={handleCancel}
             variant="outline"
             disabled={isLoading}
           />
-          
           <Button
             title="Cadastrar Paciente"
             onPress={handleSubmit}
@@ -463,7 +681,6 @@ export default function PatientRegistrationScreen() {
           />
         </ThemedView>
       </KeyboardAvoidingView>
-
       {isLoading && <LoadingSpinner overlay />}
     </ThemedView>
   );
@@ -474,17 +691,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: Metrics.padding.lg,
     paddingVertical: Metrics.padding.md,
     gap: Metrics.margin.md,
+    backgroundColor: "#000",
   },
   backButton: {
     padding: Metrics.padding.sm,
   },
   headerContent: {
     flex: 1,
+    backgroundColor: "#000",
   },
   headerSubtitle: {
     fontSize: Metrics.fontSize.sm,
@@ -503,24 +722,34 @@ const styles = StyleSheet.create({
   sectionHeader: {
     marginTop: Metrics.margin.lg,
     marginBottom: Metrics.margin.md,
+    backgroundColor: "#000",
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   },
   sectionSubtitle: {
     fontSize: Metrics.fontSize.sm,
     marginTop: 4,
   },
   row: {
-    flexDirection: 'row',
-    gap: Metrics.margin.md,
+    flexDirection: "row",
+    gap: 0,
+    backgroundColor: "#000",
+    alignItems: "flex-start",
+    borderWidth: 0,
+    shadowColor: "transparent",
+    elevation: 0,
+    padding: 0,
+    margin: 0,
   },
   inputContainer: {
     flex: 1,
   },
   textArea: {
     minHeight: 80,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   footer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: Metrics.padding.lg,
     paddingVertical: Metrics.padding.md,
     borderTopWidth: StyleSheet.hairlineWidth,

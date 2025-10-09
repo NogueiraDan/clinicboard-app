@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
-  TouchableOpacity, 
-  Text, 
-  StyleSheet, 
-  ActivityIndicator, 
-  type TouchableOpacityProps 
+import {
+    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    type TouchableOpacityProps
 } from 'react-native';
 
 import { Colors } from '@/constants/theme';
@@ -14,6 +14,7 @@ interface ButtonProps extends TouchableOpacityProps {
   title: string;
   variant?: 'primary' | 'secondary' | 'outline';
   isLoading?: boolean;
+  textStyle?: object;
 }
 
 export const Button = React.memo<ButtonProps>(({ 
@@ -22,6 +23,7 @@ export const Button = React.memo<ButtonProps>(({
   isLoading = false,
   disabled,
   style,
+  textStyle,
   ...props 
 }) => {
   const colorScheme = useColorScheme() ?? 'light';
@@ -45,6 +47,7 @@ export const Button = React.memo<ButtonProps>(({
     variant === 'primary' && { color: '#FFFFFF' },
     variant === 'secondary' && { color: '#FFFFFF' },
     variant === 'outline' && { color: colors.tint },
+    textStyle,
   ];
 
   return (

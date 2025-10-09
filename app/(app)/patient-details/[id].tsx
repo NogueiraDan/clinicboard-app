@@ -1,25 +1,23 @@
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
 import {
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   Alert,
   Linking,
   RefreshControl,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Button } from '@/components/ui/button';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { PatientInfoCard } from '@/components/patient/patient-info-card';
 import { PatientInfoRow } from '@/components/patient/patient-info-row';
-import { Colors } from '@/constants/theme';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Button } from '@/components/ui/button';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Metrics } from '@/constants/metrics';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePatientData } from '@/hooks/use-patient-data';
 import { formatters } from '@/utils/formatters';
 
@@ -30,25 +28,24 @@ interface ActionButtonProps {
   variant?: 'primary' | 'secondary' | 'danger';
 }
 
+
 const ActionButton = React.memo<ActionButtonProps>(({ 
   icon, 
   title, 
   onPress, 
   variant = 'secondary' 
 }) => {
-  const colorScheme = useColorScheme() ?? 'light';
-  const colors = Colors[colorScheme];
-
+  // Forçar padrão escuro para botões secundários
   const buttonColors = useMemo(() => {
     switch (variant) {
       case 'primary':
-        return { background: colors.tint, text: '#FFFFFF', icon: '#FFFFFF' };
+        return { background: '#0096FF', text: '#fff', icon: '#fff' };
       case 'danger':
-        return { background: '#FF6B6B', text: '#FFFFFF', icon: '#FFFFFF' };
+        return { background: '#FF6B6B', text: '#fff', icon: '#fff' };
       default:
-        return { background: colors.icon + '20', text: colors.text, icon: colors.icon };
+        return { background: '#111a', text: '#fff', icon: '#fff' };
     }
-  }, [variant, colors]);
+  }, [variant]);
 
   return (
     <TouchableOpacity
@@ -75,8 +72,6 @@ ActionButton.displayName = 'ActionButton';
 
 export default function PatientDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const colorScheme = useColorScheme() ?? 'light';
-  const colors = Colors[colorScheme];
   const insets = useSafeAreaInsets();
 
   const { patient, isLoading, error, refetch } = usePatientData(id || '');
@@ -171,7 +166,7 @@ export default function PatientDetailsScreen() {
 
   if (isLoading) {
     return (
-      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+      <ThemedView style={[styles.container, { backgroundColor: '#000', paddingTop: insets.top }] }>
         <LoadingSpinner />
       </ThemedView>
     );
@@ -179,8 +174,8 @@ export default function PatientDetailsScreen() {
 
   if (error || !patient) {
     return (
-      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-        <ThemedView style={styles.header}>
+      <ThemedView style={[styles.container, { backgroundColor: '#000', paddingTop: insets.top }] }>
+        <ThemedView style={[styles.header, { backgroundColor: '#000' }] }>
           <TouchableOpacity
             style={styles.backButton}
             onPress={handleGoBack}
@@ -189,20 +184,20 @@ export default function PatientDetailsScreen() {
             <IconSymbol
               name="chevron.left"
               size={Metrics.iconSize.md}
-              color={colors.icon}
+              color="#fff"
             />
           </TouchableOpacity>
-          <ThemedText type="title">Erro</ThemedText>
+          <ThemedText type="title" style={{ color: '#fff' }}>Erro</ThemedText>
         </ThemedView>
 
         <ThemedView style={styles.errorContainer}>
           <IconSymbol
             name="exclamationmark.triangle"
             size={64}
-            color={colors.icon}
+            color="#fff"
             style={styles.errorIcon}
           />
-          <ThemedText type="subtitle" style={styles.errorTitle}>
+          <ThemedText type="subtitle" style={[styles.errorTitle, { color: '#fff' }] }>
             {error || 'Paciente não encontrado'}
           </ThemedText>
           <Button
@@ -216,9 +211,9 @@ export default function PatientDetailsScreen() {
   }
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+    <ThemedView style={[styles.container, { backgroundColor: '#000', paddingTop: insets.top }]}> 
       {/* Header */}
-      <ThemedView style={styles.header}>
+      <ThemedView style={[styles.header, { backgroundColor: '#000', borderRadius: 0, elevation: 0, shadowOpacity: 0, borderWidth: 0 }] }>
         <TouchableOpacity
           style={styles.backButton}
           onPress={handleGoBack}
@@ -227,19 +222,17 @@ export default function PatientDetailsScreen() {
           <IconSymbol
             name="chevron.left"
             size={Metrics.iconSize.md}
-            color={colors.icon}
+            color="#fff"
           />
         </TouchableOpacity>
-        
-        <ThemedView style={styles.headerContent}>
-          <ThemedText type="title" numberOfLines={1}>
+        <ThemedView style={[styles.headerContent, { backgroundColor: 'transparent' }] }>
+          <ThemedText type="title" numberOfLines={1} style={{ color: '#fff' }}>
             {patient.name}
           </ThemedText>
-          <ThemedText style={[styles.headerSubtitle, { color: colors.icon }]}>
+          <ThemedText style={[styles.headerSubtitle, { color: '#fff9' }]}> {/* branco translúcido */}
             Detalhes do paciente
           </ThemedText>
         </ThemedView>
-
         <TouchableOpacity
           style={styles.editButton}
           onPress={handleEditPatient}
@@ -248,7 +241,7 @@ export default function PatientDetailsScreen() {
           <IconSymbol
             name="pencil"
             size={Metrics.iconSize.md}
-            color={colors.icon}
+            color="#fff"
           />
         </TouchableOpacity>
       </ThemedView>
@@ -261,13 +254,13 @@ export default function PatientDetailsScreen() {
           <RefreshControl
             refreshing={isLoading}
             onRefresh={refetch}
-            tintColor={colors.tint}
-            colors={[colors.tint]}
+            tintColor="#fff"
+            colors={["#fff"]}
           />
         }
       >
         {/* Ações Rápidas */}
-        <ThemedView style={styles.actionsContainer}>
+        <ThemedView style={[styles.actionsContainer, { backgroundColor: '#000' }] }>
           <ActionButton
             icon="phone.fill"
             title="Ligar"
@@ -292,14 +285,18 @@ export default function PatientDetailsScreen() {
           icon="person.circle"
           isEditable
           onEdit={handleEditPatient}
+          cardStyle={{ backgroundColor: '#fff', borderColor: '#fff2' }}
+          titleStyle={{ color: '#000' }}
+          iconColor="#000"
         >
-          <PatientInfoRow label="Nome Completo" value={patient.name} />
-          <PatientInfoRow label="Email" value={patient.email} />
-          <PatientInfoRow label="Telefone" value={formattedData?.phone || ''} />
+          <PatientInfoRow label="Nome Completo" value={patient.name} valueStyle={{ color: '#000' }} />
+          <PatientInfoRow label="Email" value={patient.email} valueStyle={{ color: '#000' }} />
+          <PatientInfoRow label="Telefone" value={formattedData?.phone || ''} valueStyle={{ color: '#000' }} />
           <PatientInfoRow 
             label="Data de Nascimento" 
             value={formattedData?.birthDate || ''} 
             isLast
+            valueStyle={{ color: '#000' }}
           />
         </PatientInfoCard>
 
@@ -309,11 +306,15 @@ export default function PatientDetailsScreen() {
           icon="house"
           isEditable
           onEdit={handleEditPatient}
+          cardStyle={{ backgroundColor: '#fff', borderColor: '#fff2' }}
+          titleStyle={{ color: '#000' }}
+          iconColor="#000"
         >
           <PatientInfoRow 
             label="Endereço Completo" 
             value={formattedData?.fullAddress || ''} 
             isLast
+            valueStyle={{ color: '#000' }}
           />
         </PatientInfoCard>
 
@@ -321,19 +322,25 @@ export default function PatientDetailsScreen() {
         <PatientInfoCard
           title="Contato de Emergência"
           icon="person.2"
+          cardStyle={{ backgroundColor: '#fff', borderColor: '#fff2' }}
+          titleStyle={{ color: '#000' }}
+          iconColor="#000"
         >
           <PatientInfoRow 
             label="Nome" 
             value={patient.emergencyContact.name} 
+            valueStyle={{ color: '#000' }}
           />
           <PatientInfoRow 
             label="Telefone" 
             value={formattedData?.emergencyPhone || ''} 
+            valueStyle={{ color: '#000' }}
           />
           <PatientInfoRow 
             label="Parentesco" 
             value={patient.emergencyContact.relationship} 
             isLast
+            valueStyle={{ color: '#000' }}
           />
         </PatientInfoCard>
 
@@ -343,15 +350,20 @@ export default function PatientDetailsScreen() {
           icon="heart.text.square"
           isEditable
           onEdit={handleEditPatient}
+          cardStyle={{ backgroundColor: '#fff', borderColor: '#fff2' }}
+          titleStyle={{ color: '#000' }}
+          iconColor="#000"
         >
           <PatientInfoRow 
             label="Histórico Médico" 
             value={patient.medicalHistory || 'Não informado'} 
+            valueStyle={{ color: '#000' }}
           />
           <PatientInfoRow 
             label="Alergias" 
             value={patient.allergies || []} 
             isLast
+            valueStyle={{ color: '#000' }}
           />
         </PatientInfoCard>
 
@@ -359,17 +371,21 @@ export default function PatientDetailsScreen() {
         <PatientInfoCard
           title="Informações do Sistema"
           icon="info.circle"
+          cardStyle={{ backgroundColor: '#fff', borderColor: '#fff2' }}
+          titleStyle={{ color: '#000' }}
+          iconColor="#000"
         >
           <PatientInfoRow 
             label="Cadastrado em" 
             value={formattedData?.createdAt || ''} 
             isLast
+            valueStyle={{ color: '#000' }}
           />
         </PatientInfoCard>
 
         {/* Ações Perigosas */}
-        <ThemedView style={styles.dangerZone}>
-          <ThemedText type="defaultSemiBold" style={styles.dangerTitle}>
+        <ThemedView style={[styles.dangerZone, { backgroundColor: '#000', borderRadius: 16, marginBottom: 24, marginTop: 16, paddingBottom: 16 }] }>
+          <ThemedText type="defaultSemiBold" style={[styles.dangerTitle, { color: '#FF6B6B' }] }>
             Zona de Perigo
           </ThemedText>
           <Button
