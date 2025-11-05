@@ -71,6 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await SecureStore.deleteItemAsync("auth_token");
       setUser(null);
+      router.replace("/(auth)/onboarding");
     } finally {
       setIsLoading(false);
     }
