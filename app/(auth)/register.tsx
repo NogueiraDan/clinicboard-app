@@ -1,3 +1,4 @@
+import { formatters } from "@/utils/formatters";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -14,28 +15,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/providers/auth-provider";
+import { User } from "@/types";
 
 interface RegisterForm {
   name: string;
   email: string;
+  contact: string;
   password: string;
-  confirmPassword: string;
 }
 
 interface FormErrors {
   name?: string;
   email?: string;
+  contact?: string;
   password?: string;
-  confirmPassword?: string;
 }
 
 export default function RegisterScreen() {
   const { signUp, isLoading } = useAuth();
   const [form, setForm] = useState<RegisterForm>({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    contact: "",
+    password: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -43,27 +45,21 @@ export default function RegisterScreen() {
     const newErrors: FormErrors = {};
 
     if (!form.name.trim()) {
-      newErrors.name = 'Nome é obrigatório';
+      newErrors.name = "Nome é obrigatório";
     } else if (form.name.trim().length < 2) {
-      newErrors.name = 'Nome deve ter pelo menos 2 caracteres';
+      newErrors.name = "Nome deve ter pelo menos 2 caracteres";
     }
 
     if (!form.email.trim()) {
-      newErrors.email = 'Email é obrigatório';
+      newErrors.email = "Email é obrigatório";
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      newErrors.email = 'Email inválido';
+      newErrors.email = "Email inválido";
     }
 
     if (!form.password.trim()) {
-      newErrors.password = 'Senha é obrigatória';
+      newErrors.password = "Senha é obrigatória";
     } else if (form.password.length < 6) {
-      newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
-    }
-
-    if (!form.confirmPassword.trim()) {
-      newErrors.confirmPassword = 'Confirmação de senha é obrigatória';
-    } else if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword = 'Senhas não coincidem';
+      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
     }
 
     setErrors(newErrors);
@@ -74,18 +70,24 @@ export default function RegisterScreen() {
     if (!validateForm()) return;
 
     try {
-      await signUp(form.name, form.email, form.password);
+      const data: User = {
+        name: form.name,
+        email: form.email,
+        contact: form.contact,
+        password: form.password,
+      };
+      await signUp(data);
       // Navegação automática será feita pelo AuthProvider
-    } catch (error) {
+    } catch {
       Alert.alert(
-        'Erro no Cadastro',
-        'Ocorreu um erro ao criar sua conta. Tente novamente.'
+        "Erro no Cadastro",
+        "Ocorreu um erro ao criar sua conta. Tente novamente."
       );
     }
   };
 
   const navigateToLogin = () => {
-    router.push('/(auth)/login');
+    router.push("/(auth)/login");
   };
 
   const navigateBack = () => {
@@ -126,7 +128,9 @@ export default function RegisterScreen() {
               <ThemedText style={styles.inputLabel}>Email</ThemedText>
               <Input
                 value={form.email}
-                onChangeText={(email) => setForm((prev) => ({ ...prev, email }))}
+                onChangeText={(email) =>
+                  setForm((prev) => ({ ...prev, email }))
+                }
                 placeholder="Digite seu email"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -137,27 +141,47 @@ export default function RegisterScreen() {
               />
             </View>
             <View style={styles.inputGroup}>
+              <ThemedText style={styles.inputLabel}>Contato</ThemedText>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <ThemedText style={{
+                  backgroundColor: '#F3F6FF',
+                  borderTopLeftRadius: 12,
+                  borderBottomLeftRadius: 12,
+                  paddingVertical: 14,
+                  paddingHorizontal: 12,
+                  fontSize: 16,
+                  color: '#222',
+                  borderWidth: 0,
+                  borderRightWidth: 1,
+                  borderColor: '#E6E6E6',
+                }}>+55</ThemedText>
+                <Input
+                  value={form.contact.replace(/^\+55/, '')}
+                  onChangeText={(value) => {
+                    setForm((prev) => ({ ...prev, contact: formatters.formatContactToBrazilE164(value) }));
+                  }}
+                  placeholder="11987654321"
+                  keyboardType="phone-pad"
+                  autoCapitalize="none"
+                  autoComplete="tel"
+                  error={errors.contact}
+                  isRequired
+                  style={[styles.input, { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }]}
+                  maxLength={11}
+                />
+              </View>
+            </View>
+            <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Senha</ThemedText>
               <Input
                 value={form.password}
-                onChangeText={(password) => setForm((prev) => ({ ...prev, password }))}
+                onChangeText={(password) =>
+                  setForm((prev) => ({ ...prev, password }))
+                }
                 placeholder="Digite sua senha"
                 secureTextEntry
                 autoComplete="new-password"
                 error={errors.password}
-                isRequired
-                style={styles.input}
-              />
-            </View>
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Confirmar Senha</ThemedText>
-              <Input
-                value={form.confirmPassword}
-                onChangeText={(confirmPassword) => setForm((prev) => ({ ...prev, confirmPassword }))}
-                placeholder="Confirme sua senha"
-                secureTextEntry
-                autoComplete="new-password"
-                error={errors.confirmPassword}
                 isRequired
                 style={styles.input}
               />
@@ -168,7 +192,7 @@ export default function RegisterScreen() {
               isLoading={isLoading}
               disabled={isLoading}
               style={styles.buttonWeb}
-              textStyle={{ color: '#000', fontWeight: 'bold', fontSize: 20 }}
+              textStyle={{ color: "#000", fontWeight: "bold", fontSize: 20 }}
             />
             <ThemedText
               style={styles.linkPrimaryWeb}

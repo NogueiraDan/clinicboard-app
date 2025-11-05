@@ -1,4 +1,6 @@
 import { useLogin } from "@/hooks/tanstack/use-login";
+import { useRegister } from "@/hooks/tanstack/use-register";
+import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import React, {
   createContext,
@@ -12,6 +14,7 @@ interface AuthContextProps {
   user: User | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (data: User) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -24,6 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const { login } = useLogin();
+  const { register } = useRegister();
 
   // Checa token salvo e carrega usuário
   useEffect(() => {
@@ -53,6 +57,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         });
         await SecureStore.setItemAsync("auth_token", user.access_token);
         setUser(user);
+        // Redireciona para o dashboard e desmonta a pilha de auth
+        router.replace("/(app)/(tabs)");
       } finally {
         setIsLoading(false);
       }
@@ -70,8 +76,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  const signUp = useCallback(
+    async (data: User) => {
+      setIsLoading(true);
+      try {
+        await register(data);
+        const loginResponse = await login({
+          email: data.email,
+          password: data.password ?? "",
+        });
+        await SecureStore.setItemAsync(
+          "auth_token",
+          loginResponse.access_token
+        );
+        setUser(loginResponse);
+        // Redireciona para o dashboard e desmonta a pilha de auth
+        router.replace("/(app)/(tabs)");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [login, register]
+  );
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

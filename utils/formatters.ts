@@ -1,4 +1,12 @@
 export const formatters = {
+  /**
+   * Formata o valor digitado para o padrão '+55XXXXXXXXXXX' (E.164 Brasil)
+   * Exemplo: input '11999876543' => '+5511999876543'
+   */
+  formatContactToBrazilE164: (value: string): string => {
+    const onlyNumbers = value.replace(/\D/g, '').slice(0, 11);
+    return onlyNumbers ? `+55${onlyNumbers}` : '';
+  },
   phone: (value: string): string => {
     const numbers = value.replace(/\D/g, '');
     
