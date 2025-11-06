@@ -1,15 +1,15 @@
 import { authService } from "@/service/auth-service";
 import { LoginRequest, LoginResponse } from "@/types";
 import { useMutation } from "@tanstack/react-query";
-import { Alert } from "react-native";
+import { ToastAndroid } from "react-native";
 
 export function useLogin() {
   const handleSuccess = () => {
-    Alert.alert("Login successful");
+    ToastAndroid.show("Login realizado com sucesso", ToastAndroid.SHORT);
   };
 
   const handleError = (error: any) => {
-    Alert.alert("Login failed", `Erro: ${error?.message || 'Erro desconhecido'}`);
+    ToastAndroid.show(`Falha no login: ${error?.message || 'Erro desconhecido'}`, ToastAndroid.LONG);
   };
 
   const { mutateAsync } = useMutation({
