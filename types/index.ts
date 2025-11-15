@@ -1,42 +1,16 @@
 export interface Patient {
-  id: string;
+  id?: string;
+  additional_info?: string;
   name: string;
   email: string;
   phone: string;
-  birthDate: string;
-  address: Address;
-  medicalHistory?: string;
-  allergies?: string[];
-  emergencyContact: EmergencyContact;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Address {
-  street: string;
-  number: string;
-  complement?: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  zipCode: string;
+  user_id: string;
 }
 
 export interface EmergencyContact {
   name: string;
   phone: string;
   relationship: string;
-}
-
-export interface PatientFormData {
-  name: string;
-  email: string;
-  phone: string;
-  birthDate: string;
-  address: Address;
-  medicalHistory?: string;
-  allergies: string;
-  emergencyContact: EmergencyContact;
 }
 
 export type LoginRequest = {

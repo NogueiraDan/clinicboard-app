@@ -13,7 +13,7 @@ export const API_ENDPOINTS = {
     // Patients
     CREATE_PATIENT: '/business-service/patients',
     FIND_ALL_PATIENT: '/business-service/patients',
-    FIND_PATIENT_BY_ID: (id: string) => `/business-service/patients/${id}`,
+    FIND_PATIENT_BY_ID: (id: string) => `/business-service/patients/patient/${id}`,
     FIND_PATIENT_BY_USER_ID: (user_id: string) => `/business-service/patients/user/${user_id}`,
     FIND_PATIENT_BY_NAME: (name: string) => `/business-service/patients/patient?name=${name}`,
     UPDATE_PATIENT: (id: string) => `/business-service/patients/${id}`,
