@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Metrics } from "@/constants/metrics";
 import { useFormValidation } from "@/hooks/use-form-validation";
+import { useAuth } from "@/providers/auth-provider";
 import { Patient } from "@/types";
 import { formatters } from "@/utils/formatters";
 import { validationRules } from "@/utils/validation";
@@ -84,6 +85,7 @@ export default function PatientRegistrationScreen() {
   };
   const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const {
     values,
@@ -167,16 +169,17 @@ export default function PatientRegistrationScreen() {
     try {
       // Simular chamada de API
       await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log(values);
 
-      Alert.alert("Sucesso!", "Paciente cadastrado com sucesso.", [
-        {
-          text: "OK",
-          onPress: () => {
-            resetForm();
-            router.back();
-          },
-        },
-      ]);
+      // Alert.alert("Sucesso!", "Paciente cadastrado com sucesso.", [
+      //   {
+      //     text: "OK",
+      //     onPress: () => {
+      //       resetForm();
+      //       router.back();
+      //     },
+      //   },
+      // ]);
     } catch (error) {
       Alert.alert(
         "Erro",
@@ -330,7 +333,9 @@ export default function PatientRegistrationScreen() {
           <Input
             label="Informações Adicionais"
             value={getFieldValue("additional_info")}
-            onChangeText={(value) => handleInputChange("additional_info", value)}
+            onChangeText={(value) =>
+              handleInputChange("additional_info", value)
+            }
             onBlur={() => setFieldTouched("additional_info")}
             placeholder="Adicione informações adicionais se tiver..."
             multiline
@@ -345,7 +350,7 @@ export default function PatientRegistrationScreen() {
                 color: colors.text,
                 borderColor: colors.border,
               },
-              styles.textArea
+              styles.textArea,
             ]}
             placeholderTextColor={colors.placeholder}
           />

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { validateField, ValidationResult } from '@/utils/validation';
+import { ValidationResult } from '@/utils/validation';
 
 type ValidationRules<T> = {
   [K in keyof T]?: ((value: string) => ValidationResult)[];
@@ -86,7 +86,7 @@ export function useFormValidation<T extends Record<string, any>>(
   const resetForm = useCallback(() => {
     setValues(initialValues);
     setErrors({});
-    setTouched({});
+    setTouched({} as Record<keyof T, boolean>);
   }, [initialValues]);
 
   return {
