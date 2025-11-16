@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "@/constants/endpoints";
-import { Patient } from "@/types";
+import { Appointment, Patient } from "@/types";
 import api from "./api";
 
 export const businessService = {
@@ -21,6 +21,13 @@ export const businessService = {
     const { data } = await api.post<Patient>(
       API_ENDPOINTS.BUSINESS_SERVICE.CREATE_PATIENT,
       patient
+    );
+    return data;
+  },
+
+  findAppointmentByDate: async (user_id: string, date: string): Promise<Appointment[]> => {
+    const { data } = await api.get<Appointment[]>(
+      API_ENDPOINTS.BUSINESS_SERVICE.FIND_APPOINTMENT_BY_DATE(user_id, date)
     );
     return data;
   },

@@ -36,3 +36,18 @@ export type User = {
   email: string;
   contact: string;
 };
+
+enum AppointmentType {
+  MARCACAO = 'MARCACAO',
+  REMARCACAO = 'REMARCACAO',
+  CANCELAMENTO = 'CANCELAMENTO',
+}
+
+export interface Appointment {
+  id: string;
+  date: string;
+  hour: string;
+  type: AppointmentType;
+  user_id: string;
+  patient_id: string;
+}
