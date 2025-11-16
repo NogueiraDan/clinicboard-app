@@ -17,7 +17,7 @@ export const businessService = {
     return data;
   },
 
-  register: async (patient: Patient): Promise<Patient> => {
+  createPatient: async (patient: Patient): Promise<Patient> => {
     const { data } = await api.post<Patient>(
       API_ENDPOINTS.BUSINESS_SERVICE.CREATE_PATIENT,
       patient

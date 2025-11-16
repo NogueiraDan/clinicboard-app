@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -17,6 +17,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Metrics } from "@/constants/metrics";
+import { useCreatePatient } from "@/hooks/tanstack/use-create-patient";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { useAuth } from "@/providers/auth-provider";
 import { Patient } from "@/types";
@@ -86,6 +87,7 @@ export default function PatientRegistrationScreen() {
   const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  const { createPatient } = useCreatePatient();
 
   const {
     values,
@@ -93,10 +95,8 @@ export default function PatientRegistrationScreen() {
     setValue,
     setFieldTouched: setFieldTouchedRaw,
     validateForm,
-    resetForm,
   } = useFormValidation(INITIAL_VALUES, VALIDATION_RULES);
 
-  // Permitir campos aninhados (string) para setFieldTouched
   const setFieldTouched = useCallback(
     (field: keyof Patient | string) => {
       setFieldTouchedRaw(field as any);
@@ -122,7 +122,12 @@ export default function PatientRegistrationScreen() {
           });
         }
       } else {
-        setValue(field as keyof Patient, value);
+        if (field === "phone") {
+          const formattedValue = formatters.smartPhone(value);
+          setValue(field as keyof Patient, formattedValue);
+        } else {
+          setValue(field as keyof Patient, value);
+        }
       }
     },
     [values, setValue]
@@ -163,24 +168,16 @@ export default function PatientRegistrationScreen() {
       );
       return;
     }
-
     setIsLoading(true);
-
     try {
-      // Simular chamada de API
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log(values);
-
-      // Alert.alert("Sucesso!", "Paciente cadastrado com sucesso.", [
-      //   {
-      //     text: "OK",
-      //     onPress: () => {
-      //       resetForm();
-      //       router.back();
-      //     },
-      //   },
-      // ]);
-    } catch (error) {
+      // Simulação de fetching
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const payload = {
+        ...values,
+        user_id: user?.id || "",
+      };
+      await createPatient(payload);
+    } catch {
       Alert.alert(
         "Erro",
         "Não foi possível cadastrar o paciente. Tente novamente."
@@ -188,7 +185,7 @@ export default function PatientRegistrationScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [validateForm, resetForm]);
+  }, [createPatient, user?.id, validateForm, values]);
 
   const handleCancel = useCallback(() => {
     Alert.alert(
@@ -204,11 +201,6 @@ export default function PatientRegistrationScreen() {
       ]
     );
   }, []);
-
-  const formattedPhone = useMemo(
-    () => formatters.phone(getFieldValue("phone")),
-    [getFieldValue]
-  );
 
   return (
     <ThemedView
@@ -316,10 +308,10 @@ export default function PatientRegistrationScreen() {
           />
           <Input
             label="Telefone"
-            value={formattedPhone}
+            value={getFieldValue("phone")}
             onChangeText={(value) => handleInputChange("phone", value)}
             onBlur={() => setFieldTouched("phone")}
-            placeholder="(11) 99999-9999"
+            placeholder="11987654321"
             keyboardType="phone-pad"
             error={getFieldError("phone")}
             isRequired

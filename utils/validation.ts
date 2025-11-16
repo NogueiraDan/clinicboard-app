@@ -19,11 +19,13 @@ export const validationRules = {
   },
 
   phone: (value: string): ValidationResult => {
-    const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
+    // Brazilian international format: +5511987654321 or +55119876543 (10/11 digits after +55)
+    const phoneRegex = /^\+55\d{10,11}$/;
     const isValid = phoneRegex.test(value);
+    
     return {
       isValid,
-      error: !isValid ? 'Telefone deve estar no formato (11) 99999-9999' : undefined,
+      error: !isValid ? 'Telefone deve estar no formato +5511987654321' : undefined,
     };
   },
 

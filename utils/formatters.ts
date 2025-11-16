@@ -7,6 +7,28 @@ export const formatters = {
     const onlyNumbers = value.replace(/\D/g, '').slice(0, 11);
     return onlyNumbers ? `+55${onlyNumbers}` : '';
   },
+  
+  /**
+   * Formata telefone de forma inteligente, respeitando entrada do usuário
+   */
+  smartPhone: (value: string): string => {
+    // Se já começar com +55, manter e apenas limpar caracteres inválidos
+    if (value.startsWith('+55')) {
+      const numbers = value.replace(/\D/g, '');
+      const withoutCountryCode = numbers.slice(2); // Remove os '55' do país
+      return `+55${withoutCountryCode.slice(0, 11)}`; // Limita a 11 dígitos após +55
+    }
+    
+    // Se começar só com +, adicionar 55
+    if (value.startsWith('+')) {
+      const numbers = value.replace(/\D/g, '');
+      return `+55${numbers.slice(0, 11)}`;
+    }
+    
+    // Se for só números, adicionar +55
+    const numbers = value.replace(/\D/g, '');
+    return numbers ? `+55${numbers.slice(0, 11)}` : '';
+  },
   phone: (value: string): string => {
     const numbers = value.replace(/\D/g, '');
     
