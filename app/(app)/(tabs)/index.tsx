@@ -3,13 +3,12 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
 import { useAppointments } from "@/hooks/tanstack/use-appointments";
-import { useAuth } from "@/providers/auth-provider";
+import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export default function DashboardScreen() {
-  const { user } = useAuth();
   const [date, setDate] = React.useState<string>(
     () => new Date().toISOString().split("T")[0]
   );
@@ -25,6 +24,11 @@ export default function DashboardScreen() {
     router.push("/(app)/(tabs)/patients");
   }, []);
 
+  const navigateToNewAppointment = React.useCallback(() => {
+    // TODO: Implementar navegação para tela de novo agendamento
+    router.push("/(app)/patient-registration"); // Temporário
+  }, []);
+
   const handleDateSelect = React.useCallback(
     (dateString: string) => {
       setDate(dateString);
@@ -33,50 +37,66 @@ export default function DashboardScreen() {
     [refetchAppointments]
   );
 
-  const welcomeMessage = React.useMemo(
-    () => `Olá, ${user?.name}!`,
-    [user?.name]
-  );
+  const currentMonthYear = React.useMemo(() => {
+    const dateObj = new Date(date);
+    return dateObj.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  }, [date]);
 
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.innerContent}>
-        <ThemedText
-          type="title"
-          style={styles.title}
-          accessibilityRole="header"
-          accessibilityLabel={welcomeMessage}
+      <StatusBar barStyle="light-content" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.headerIcon}>
+          <Ionicons name="menu" size={28} color="#fff" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={navigateToPatientRegistration}
         >
-          {welcomeMessage}
+          <Ionicons name="add" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Month/Year Title */}
+        <ThemedText style={styles.monthTitle}>
+          {currentMonthYear}
         </ThemedText>
 
-        <ThemedText style={styles.subtitle}>
-          Bem-vindo ao seu dashboard
-        </ThemedText>
-
+        {/* Calendar Section */}
         <CalendarSection
           onDateSelect={handleDateSelect}
           appointments={appointments}
           isFetching={isFetching}
         />
 
+        {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <Button
-            title="Cadastrar Paciente"
-            onPress={navigateToPatientRegistration}
-            style={styles.buttonWeb}
-            textStyle={styles.buttonWebText}
-            variant="primary"
-          />
           <Button
             title="Ver Todos os Pacientes"
             onPress={navigateToPatientsList}
-            style={styles.buttonOutline}
-            textStyle={styles.buttonOutlineText}
-            variant="outline"
+            style={styles.buttonPrimary}
+            textStyle={styles.buttonPrimaryText}
+            variant="primary"
           />
         </View>
-      </View>
+      </ScrollView>
+
+      {/* FAB - Floating Action Button para Novo Agendamento */}
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={navigateToNewAppointment}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="calendar" size={28} color="#fff" />
+      </TouchableOpacity>
     </ThemedView>
   );
 }
@@ -84,78 +104,88 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0E27",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingBottom: 16,
+  },
+  headerIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 0,
   },
-  innerContent: {
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#5B67CA",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#5B67CA",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  scrollView: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    maxWidth: 420,
-    paddingHorizontal: 24,
-    alignSelf: "center",
   },
-  title: {
-    textAlign: "center",
-    fontSize: 38,
-    fontWeight: Platform.OS === "ios" ? "800" : "bold",
-    color: "#fff",
-    marginBottom: 10,
-    lineHeight: 44,
-    letterSpacing: 0.2,
-    alignSelf: "center",
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 32,
   },
-  subtitle: {
+  monthTitle: {
+    fontSize: 24,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
     color: "#fff",
-    fontSize: 17,
-    opacity: 0.85,
-    marginBottom: 32,
-    textAlign: "center",
-    alignSelf: "center",
+    marginBottom: 20,
+    textTransform: "capitalize",
+    letterSpacing: 0.5,
   },
   actionButtons: {
-    gap: 16,
-    marginTop: 0,
+    marginTop: 24,
     width: "100%",
   },
-  buttonWeb: {
-    backgroundColor: "#10213A",
-    borderRadius: 8,
-    paddingVertical: 16,
-    marginTop: 0,
-    marginBottom: 0,
+  buttonPrimary: {
+    backgroundColor: "#5B67CA",
+    borderRadius: 16,
+    paddingVertical: 18,
     alignSelf: "stretch",
     width: "100%",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowColor: "#5B67CA",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  buttonWebText: {
+  buttonPrimaryText: {
     color: "#fff",
-    fontWeight: "bold",
-    fontSize: 20,
-    letterSpacing: 0.1,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    fontSize: 16,
+    letterSpacing: 0.5,
   },
-  buttonOutline: {
-    backgroundColor: "transparent",
-    borderColor: "#fff",
-    borderWidth: 1.5,
-    borderRadius: 8,
-    paddingVertical: 16,
-    marginTop: 0,
-    marginBottom: 0,
-    alignSelf: "stretch",
-    width: "100%",
-  },
-  buttonOutlineText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 20,
-    letterSpacing: 0.1,
-    opacity: 0.7,
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#5B67CA",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#5B67CA",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

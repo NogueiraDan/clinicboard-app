@@ -2,12 +2,13 @@ import { formatters } from "@/utils/formatters";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    View,
 } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -99,31 +100,36 @@ export default function RegisterScreen() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      <StatusBar barStyle="light-content" />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.innerContent}>
-          <ThemedText type="title" style={styles.title}>
+          <ThemedText style={styles.title}>
             Criar Conta
           </ThemedText>
           <ThemedText style={styles.subtitle}>
             Preencha os dados para criar sua conta
           </ThemedText>
+          
           <View style={styles.form}>
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Nome</ThemedText>
+              <ThemedText style={styles.inputLabel}>Nome Completo</ThemedText>
               <Input
                 value={form.name}
                 onChangeText={(name) => setForm((prev) => ({ ...prev, name }))}
-                placeholder="Digite seu nome completo"
+                placeholder="Seu nome completo"
                 autoCapitalize="words"
                 autoComplete="name"
                 error={errors.name}
                 isRequired
                 style={styles.input}
+                placeholderTextColor="rgba(255, 255, 255, 0.4)"
               />
             </View>
+            
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Email</ThemedText>
               <Input
@@ -131,30 +137,21 @@ export default function RegisterScreen() {
                 onChangeText={(email) =>
                   setForm((prev) => ({ ...prev, email }))
                 }
-                placeholder="Digite seu email"
+                placeholder="seu@email.com"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
                 error={errors.email}
                 isRequired
                 style={styles.input}
+                placeholderTextColor="rgba(255, 255, 255, 0.4)"
               />
             </View>
+            
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Contato</ThemedText>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <ThemedText style={{
-                  backgroundColor: '#F3F6FF',
-                  borderTopLeftRadius: 12,
-                  borderBottomLeftRadius: 12,
-                  paddingVertical: 14,
-                  paddingHorizontal: 12,
-                  fontSize: 16,
-                  color: '#222',
-                  borderWidth: 0,
-                  borderRightWidth: 1,
-                  borderColor: '#E6E6E6',
-                }}>+55</ThemedText>
+              <ThemedText style={styles.inputLabel}>Telefone</ThemedText>
+              <View style={styles.phoneContainer}>
+                <ThemedText style={styles.phonePrefix}>+55</ThemedText>
                 <Input
                   value={form.contact.replace(/^\+55/, '')}
                   onChangeText={(value) => {
@@ -166,11 +163,13 @@ export default function RegisterScreen() {
                   autoComplete="tel"
                   error={errors.contact}
                   isRequired
-                  style={[styles.input, { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }]}
+                  style={[styles.input, styles.phoneInput]}
+                  placeholderTextColor="rgba(255, 255, 255, 0.4)"
                   maxLength={11}
                 />
               </View>
             </View>
+            
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Senha</ThemedText>
               <Input
@@ -178,38 +177,42 @@ export default function RegisterScreen() {
                 onChangeText={(password) =>
                   setForm((prev) => ({ ...prev, password }))
                 }
-                placeholder="Digite sua senha"
+                placeholder="••••••••"
                 secureTextEntry
                 autoComplete="new-password"
                 error={errors.password}
                 isRequired
                 style={styles.input}
+                placeholderTextColor="rgba(255, 255, 255, 0.4)"
               />
             </View>
+            
             <Button
               title="Criar Conta"
               onPress={handleRegister}
               isLoading={isLoading}
               disabled={isLoading}
-              style={styles.buttonWeb}
-              textStyle={{ color: "#000", fontWeight: "bold", fontSize: 20 }}
+              style={styles.buttonPrimary}
+              textStyle={styles.buttonPrimaryText}
             />
-            <ThemedText
-              style={styles.linkPrimaryWeb}
-              onPress={navigateToLogin}
-              accessibilityRole="link"
-              accessibilityLabel="Já tem uma conta? Entrar"
-            >
-              Já tem uma conta? Entrar
-            </ThemedText>
-            <ThemedText
-              style={styles.linkSecondaryWeb}
-              onPress={navigateBack}
-              accessibilityRole="link"
-              accessibilityLabel="Voltar"
-            >
-              Voltar
-            </ThemedText>
+            
+            <View style={styles.linksContainer}>
+              <ThemedText style={styles.linkText}>
+                Já possui conta?{" "}
+                <ThemedText
+                  style={styles.linkHighlight}
+                  onPress={navigateToLogin}
+                >
+                  Entrar
+                </ThemedText>
+              </ThemedText>
+              <ThemedText
+                style={styles.linkSecondary}
+                onPress={navigateBack}
+              >
+                Voltar para home
+              </ThemedText>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -221,102 +224,109 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0E27",
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 48,
-    paddingBottom: 32,
+    paddingTop: Platform.OS === "ios" ? 80 : 60,
+    paddingBottom: 40,
   },
   innerContent: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
     width: "100%",
   },
   title: {
-    textAlign: "left",
-    fontSize: 38,
-    fontWeight: Platform.OS === "ios" ? "800" : "bold",
+    fontSize: 32,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
     color: "#fff",
     marginBottom: 8,
-    lineHeight: 44,
-    letterSpacing: 0.2,
-    alignSelf: "flex-start",
+    letterSpacing: 0.3,
   },
   subtitle: {
-    color: "#fff",
-    fontSize: 17,
-    marginBottom: 24,
-    opacity: 0.85,
-    textAlign: "left",
-    alignSelf: "flex-start",
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.6)",
+    marginBottom: 32,
   },
   form: {
     width: "100%",
-    maxWidth: 420,
-    alignSelf: "center",
-    backgroundColor: "transparent",
-    padding: 0,
-    margin: 0,
-    marginTop: 0,
-    marginBottom: 0,
   },
   inputGroup: {
-    marginBottom: 12,
-    width: "100%",
+    marginBottom: 20,
+  },
+  inputLabel: {
+    color: "#fff",
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    fontSize: 14,
+    marginBottom: 8,
+    letterSpacing: 0.3,
   },
   input: {
-    width: "100%",
-    backgroundColor: "#F3F6FF",
+    backgroundColor: "#1A1F3A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: "#222",
-    borderWidth: 0,
-    marginBottom: 8,
-    alignSelf: "stretch",
-  },
-  inputLabel: {
     color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 4,
-    marginLeft: 2,
   },
-  buttonWeb: {
-    backgroundColor: "#E6E6E6",
-    borderRadius: 12,
+  phoneContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  phonePrefix: {
+    backgroundColor: "#1A1F3A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
     paddingVertical: 14,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    color: "#fff",
+    borderRightWidth: 0,
+  },
+  phoneInput: {
+    flex: 1,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+  buttonPrimary: {
+    backgroundColor: "#5B67CA",
+    borderRadius: 12,
+    paddingVertical: 16,
     marginTop: 8,
     marginBottom: 24,
-    alignSelf: "stretch",
-    width: "100%",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowColor: "#5B67CA",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  linkPrimaryWeb: {
+  buttonPrimaryText: {
     color: "#fff",
-    fontWeight: "bold",
-    fontSize: 17,
-    textDecorationLine: "none",
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    marginBottom: 8,
-    alignSelf: "flex-start",
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    fontSize: 16,
+    letterSpacing: 0.5,
   },
-  linkSecondaryWeb: {
-    color: "#fff",
-    fontSize: 17,
-    fontWeight: "bold",
-    textDecorationLine: "none",
-    opacity: 1,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    alignSelf: "flex-start",
+  linksContainer: {
+    gap: 12,
+    alignItems: "center",
+  },
+  linkText: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.7)",
+    textAlign: "center",
+  },
+  linkHighlight: {
+    color: "#5B67CA",
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+  },
+  linkSecondary: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.5)",
+    textAlign: "center",
   },
 });

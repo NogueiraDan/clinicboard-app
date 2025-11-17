@@ -1,22 +1,21 @@
+import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback } from "react";
 import {
   Alert,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Metrics } from "@/constants/metrics";
 import { useAuth } from "@/providers/auth-provider";
 
 interface ProfileOptionProps {
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   subtitle?: string;
   onPress?: () => void;
@@ -33,55 +32,34 @@ const ProfileOption = React.memo<ProfileOptionProps>(
     isDestructive = false,
     showChevron = true,
   }) => {
-    // Forçar dark igual ao resto do app
     const textColor = isDestructive ? "#FF6B6B" : "#fff";
-    const iconColor = isDestructive ? "#FF6B6B" : "#fff";
+    const iconColor = isDestructive ? "#FF6B6B" : "#5B67CA";
 
     return (
       <TouchableOpacity
-        style={[
-          styles.optionItem,
-          { backgroundColor: "#000", borderBottomColor: "#fff2" },
-        ]}
+        style={styles.optionItem}
         onPress={onPress}
         disabled={!onPress}
-        activeOpacity={onPress ? Metrics.touchableOpacity : 1}
+        activeOpacity={0.7}
       >
-        <ThemedView style={[styles.optionLeft, { backgroundColor: "#000" }]}>
-          <ThemedView
-            style={[styles.iconContainer, { backgroundColor: "#fff2" }]}
-          >
-            <IconSymbol
-              name={icon as any}
-              size={Metrics.iconSize.md}
-              color={iconColor}
-            />
-          </ThemedView>
-          <ThemedView style={[styles.optionText, { backgroundColor: "#000" }]}>
-            <ThemedText
-              type="defaultSemiBold"
-              style={[{ color: textColor }]}
-              numberOfLines={1}
-            >
+        <View style={styles.optionLeft}>
+          <View style={styles.iconContainer}>
+            <Ionicons name={icon} size={20} color={iconColor} />
+          </View>
+          <View style={styles.optionText}>
+            <ThemedText style={{ color: textColor, fontWeight: Platform.OS === "ios" ? "600" : "bold" }} numberOfLines={1}>
               {title}
             </ThemedText>
             {subtitle && (
-              <ThemedText
-                style={[styles.optionSubtitle, { color: "#fff", opacity: 0.7 }]}
-                numberOfLines={1}
-              >
+              <ThemedText style={styles.optionSubtitle} numberOfLines={1}>
                 {subtitle}
               </ThemedText>
             )}
-          </ThemedView>
-        </ThemedView>
+          </View>
+        </View>
 
         {showChevron && onPress && (
-          <IconSymbol
-            name="chevron.right"
-            size={Metrics.iconSize.md}
-            color="#fff"
-          />
+          <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.4)" />
         )}
       </TouchableOpacity>
     );
@@ -92,18 +70,6 @@ ProfileOption.displayName = "ProfileOption";
 
 export default function ProfileScreen() {
   const { user, signOut, isLoading } = useAuth();
-  // Forçar dark mode igual ao patients.tsx
-  const colors = {
-    background: "#000",
-    text: "#fff",
-    icon: "#fff",
-    border: "#fff2",
-    placeholder: "#fff9",
-    primary: "#0096FF",
-    danger: "#FF6B6B",
-    tint: "#0096FF",
-  };
-  const insets = useSafeAreaInsets();
 
   const handleEditProfile = useCallback(() => {
     Alert.alert(
@@ -180,305 +146,268 @@ export default function ProfileScreen() {
 
   if (isLoading) {
     return (
-      <ThemedView
-        style={[styles.container, { backgroundColor: colors.background }]}
-      >
+      <View style={styles.container}>
         <LoadingSpinner overlay />
-      </ThemedView>
+      </View>
     );
   }
 
   return (
-    <ThemedView
-      style={[
-        styles.container,
-        { backgroundColor: colors.background, paddingTop: insets.top },
-      ]}
-    >
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
       <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { backgroundColor: colors.background },
-        ]}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header com informações do usuário */}
-        <ThemedView style={[styles.header, { backgroundColor: "#000" }]}>
-          <ThemedText type="title" style={{ color: colors.text }}>
-            Perfil
-          </ThemedText>
-          <ThemedView style={styles.userInfoCard}>
-            <ThemedView style={styles.avatarWrapper}>
-              <ThemedView style={[styles.avatar, { backgroundColor: colors.primary }] }>
-                <ThemedText style={styles.avatarText}>{userInitials}</ThemedText>
-              </ThemedView>
-            </ThemedView>
-            <ThemedView style={[styles.userDetails, { backgroundColor: '#000' }] }>
-              <ThemedText
-                type="subtitle"
-                numberOfLines={1}
-                style={{ color: colors.text, fontWeight: "bold" }}
-              >
-                {user?.name || "Nome não disponível"}
+        {/* Header */}
+        <View style={styles.header}>
+          <ThemedText style={styles.headerTitle}>Perfil</ThemedText>
+        </View>
+
+        {/* Card com informações do usuário */}
+        <View style={styles.userCard}>
+          <View style={styles.avatar}>
+            <ThemedText style={styles.avatarText}>{userInitials}</ThemedText>
+          </View>
+          <View style={styles.userInfo}>
+            <ThemedText style={styles.userName} numberOfLines={1}>
+              {user?.name || "Nome não disponível"}
+            </ThemedText>
+            <ThemedText style={styles.userEmail} numberOfLines={1}>
+              {user?.email || "Email não disponível"}
+            </ThemedText>
+            <View style={styles.badgeContainer}>
+              <ThemedText style={styles.badgeText}>
+                {user?.role === "professional" ? "Profissional" : "Administrador"}
               </ThemedText>
-              <ThemedText
-                style={[styles.userEmail, { color: colors.text, opacity: 0.8 }]}
-                numberOfLines={1}
-              >
-                {user?.email || "Email não disponível"}
-              </ThemedText>
-              <ThemedView style={styles.roleContainer}>
-                <ThemedText
-                  style={[
-                    styles.roleText,
-                    {
-                      backgroundColor: colors.primary + "20",
-                      color: colors.primary,
-                    },
-                  ]}
-                >
-                  {user?.role === "professional"
-                    ? "Profissional"
-                    : "Administrador"}
-                </ThemedText>
-              </ThemedView>
-            </ThemedView>
-          </ThemedView>
-        </ThemedView>
+            </View>
+          </View>
+        </View>
 
         {/* Seção Conta */}
-        <ThemedView
-          style={[styles.section, { backgroundColor: colors.background }]}
-        >
-          <ThemedText
-            type="defaultSemiBold"
-            style={[styles.sectionTitle, { color: colors.text, opacity: 0.7 }]}
-          >
-            Conta
-          </ThemedText>
-          <ProfileOption
-            icon="person.circle"
-            title="Editar Perfil"
-            subtitle="Nome, email e outras informações"
-            onPress={handleEditProfile}
-          />
-          <ProfileOption
-            icon="key"
-            title="Alterar Senha"
-            subtitle="Atualize sua senha de acesso"
-            onPress={handleChangePassword}
-          />
-        </ThemedView>
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>CONTA</ThemedText>
+          <View style={styles.sectionCard}>
+            <ProfileOption
+              icon="person-outline"
+              title="Editar Perfil"
+              subtitle="Nome, email e outras informações"
+              onPress={handleEditProfile}
+            />
+            <ProfileOption
+              icon="key-outline"
+              title="Alterar Senha"
+              subtitle="Atualize sua senha de acesso"
+              onPress={handleChangePassword}
+            />
+          </View>
+        </View>
 
         {/* Seção Configurações */}
-        <ThemedView
-          style={[styles.section, { backgroundColor: colors.background }]}
-        >
-          <ThemedText
-            type="defaultSemiBold"
-            style={[styles.sectionTitle, { color: colors.text, opacity: 0.7 }]}
-          >
-            Configurações
-          </ThemedText>
-          <ProfileOption
-            icon="bell"
-            title="Notificações"
-            subtitle="Gerencie suas notificações"
-            onPress={handleNotifications}
-          />
-          <ProfileOption
-            icon="lock.shield"
-            title="Privacidade"
-            subtitle="Política de privacidade e termos"
-            onPress={handlePrivacy}
-          />
-        </ThemedView>
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>CONFIGURAÇÕES</ThemedText>
+          <View style={styles.sectionCard}>
+            <ProfileOption
+              icon="notifications-outline"
+              title="Notificações"
+              subtitle="Gerencie suas notificações"
+              onPress={handleNotifications}
+            />
+            <ProfileOption
+              icon="shield-checkmark-outline"
+              title="Privacidade"
+              subtitle="Política de privacidade e termos"
+              onPress={handlePrivacy}
+            />
+          </View>
+        </View>
 
         {/* Seção Suporte */}
-        <ThemedView
-          style={[styles.section, { backgroundColor: colors.background }]}
-        >
-          <ThemedText
-            type="defaultSemiBold"
-            style={[styles.sectionTitle, { color: colors.text, opacity: 0.7 }]}
-          >
-            Suporte
-          </ThemedText>
-          <ProfileOption
-            icon="questionmark.circle"
-            title="Ajuda e Suporte"
-            subtitle="Central de ajuda e contato"
-            onPress={handleSupport}
-          />
-          <ProfileOption
-            icon="info.circle"
-            title="Sobre o App"
-            subtitle="Versão 1.0.0"
-            showChevron={false}
-          />
-        </ThemedView>
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>SUPORTE</ThemedText>
+          <View style={styles.sectionCard}>
+            <ProfileOption
+              icon="help-circle-outline"
+              title="Ajuda e Suporte"
+              subtitle="Central de ajuda e contato"
+              onPress={handleSupport}
+            />
+            <ProfileOption
+              icon="information-circle-outline"
+              title="Sobre o App"
+              subtitle="Versão 1.0.0"
+              showChevron={false}
+            />
+          </View>
+        </View>
 
-        {/* Logout */}
-        <ThemedView
-          style={[styles.section, { backgroundColor: colors.background }]}
-        >
-          <ProfileOption
-            icon="arrow.right.square"
-            title="Sair"
-            onPress={handleLogout}
-            isDestructive
-            showChevron={false}
-          />
-        </ThemedView>
+        {/* Botão de Logout */}
+        <View style={styles.logoutSection}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={20} color="#FF6B6B" />
+            <ThemedText style={styles.logoutText}>Sair da Conta</ThemedText>
+          </TouchableOpacity>
+        </View>
 
-        {/* Footer com versão */}
-        <ThemedView
-          style={[styles.footer, { backgroundColor: colors.background }]}
-        >
-          <ThemedText style={[styles.footerText, { color: colors.icon }]}>
-            ClinicBoard v1.0.0
-          </ThemedText>
-          <ThemedText style={[styles.footerText, { color: colors.icon }]}>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <ThemedText style={styles.footerText}>ClinicBoard v1.0.0</ThemedText>
+          <ThemedText style={styles.footerText}>
             {Platform.OS === "ios" ? "iOS" : "Android"} • React Native
           </ThemedText>
-        </ThemedView>
+        </View>
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0E27",
   },
   scrollContent: {
-    flexGrow: 1,
-    paddingBottom: Metrics.padding.xl,
-    backgroundColor: "#000",
+    paddingBottom: 40,
   },
   header: {
-    padding: Metrics.padding.lg,
-    gap: Metrics.margin.lg,
-    backgroundColor: "#000",
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingBottom: 20,
   },
-  userInfo: {
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
+    color: "#fff",
+    letterSpacing: 0.3,
+  },
+  userCard: {
+    backgroundColor: "#1A1F3A",
+    marginHorizontal: 24,
+    borderRadius: 16,
+    padding: 20,
     flexDirection: "row",
     alignItems: "center",
-    gap: Metrics.margin.md,
+    marginBottom: 32,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   avatar: {
     width: 64,
     height: 64,
     borderRadius: 32,
+    backgroundColor: "#5B67CA",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0096FF",
+    marginRight: 16,
   },
   avatarText: {
     color: "#fff",
-    fontSize: Metrics.fontSize.lg,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
   },
-  // Removido duplicidade, já está definido abaixo com backgroundColor: '#000', gap e minWidth
-  userEmail: {
-    fontSize: Metrics.fontSize.sm,
+  userInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
     color: "#fff",
-    opacity: 0.8,
   },
-  roleContainer: {
+  userEmail: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.6)",
+  },
+  badgeContainer: {
     alignSelf: "flex-start",
+    marginTop: 4,
   },
-  roleText: {
-    fontSize: Metrics.fontSize.xs,
-    fontWeight: "600",
-    paddingHorizontal: Metrics.padding.sm,
+  badgeText: {
+    fontSize: 12,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "#5B67CA",
+    backgroundColor: "rgba(91, 103, 202, 0.15)",
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: Metrics.borderRadius.sm,
-    overflow: "hidden",
-    backgroundColor: "#0096FF20",
-    color: "#0096FF",
+    borderRadius: 6,
   },
   section: {
-    marginBottom: Metrics.margin.lg,
-    backgroundColor: "#000",
+    marginBottom: 24,
+    paddingHorizontal: 24,
   },
   sectionTitle: {
-    paddingHorizontal: Metrics.padding.lg,
-    paddingBottom: Metrics.padding.sm,
-    opacity: 0.7,
-    color: "#fff",
+    fontSize: 12,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "rgba(255, 255, 255, 0.5)",
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  sectionCard: {
+    backgroundColor: "#1A1F3A",
+    borderRadius: 12,
+    overflow: "hidden",
   },
   optionItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Metrics.padding.lg,
-    paddingVertical: Metrics.padding.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#fff2",
-    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.05)",
   },
   optionLeft: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: Metrics.margin.md,
+    gap: 12,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: Metrics.borderRadius.md,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(91, 103, 202, 0.15)",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff2",
   },
   optionText: {
     flex: 1,
     gap: 2,
   },
   optionSubtitle: {
-    fontSize: Metrics.fontSize.sm,
-    color: "#fff",
-    opacity: 0.7,
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.5)",
+  },
+  logoutSection: {
+    paddingHorizontal: 24,
+    marginTop: 8,
+  },
+  logoutButton: {
+    backgroundColor: "rgba(255, 107, 107, 0.1)",
+    borderRadius: 12,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255, 107, 107, 0.2)",
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "#FF6B6B",
   },
   footer: {
     alignItems: "center",
-    paddingHorizontal: Metrics.padding.lg,
-    paddingTop: Metrics.padding.xl,
+    paddingTop: 32,
     gap: 4,
-    backgroundColor: "#000",
   },
   footerText: {
-    fontSize: Metrics.fontSize.xs,
+    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.4)",
     textAlign: "center",
-    color: "#fff",
-    opacity: 0.7,
-  },
-  userInfoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#000',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 8,
-    marginHorizontal: 0,
-    alignSelf: 'stretch',
-    minHeight: 80,
-  },
-  avatarWrapper: {
-    marginRight: 16,
-    marginLeft: 0,
-    backgroundColor: 'transparent',
-    // Garante que não cole na lateral
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  userDetails: {
-    flex: 1,
-    gap: 4,
-    backgroundColor: '#000',
-    minWidth: 0,
   },
 });

@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   View,
 } from "react-native";
@@ -79,19 +80,20 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      <StatusBar barStyle="light-content" />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.innerContent}>
-          <ThemedText
-            type="title"
-            style={styles.title}
-            accessibilityRole="header"
-            accessibilityLabel="Faça login na sua conta"
-          >
-            Faça login na sua conta
+          <ThemedText style={styles.title}>
+            Bem-vindo de volta
           </ThemedText>
+          <ThemedText style={styles.subtitle}>
+            Faça login para continuar
+          </ThemedText>
+          
           <View style={styles.form}>
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Email</ThemedText>
@@ -100,15 +102,17 @@ export default function LoginScreen() {
                 onChangeText={(email) =>
                   setForm((prev) => ({ ...prev, email }))
                 }
-                placeholder="john.doe@example.com"
+                placeholder="seu@email.com"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
                 error={errors?.email}
                 isRequired
                 style={styles.input}
+                placeholderTextColor="rgba(255, 255, 255, 0.4)"
               />
             </View>
+            
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Senha</ThemedText>
               <Input
@@ -116,41 +120,38 @@ export default function LoginScreen() {
                 onChangeText={(password) =>
                   setForm((prev) => ({ ...prev, password }))
                 }
-                placeholder="••••••••••••••"
+                placeholder="••••••••"
                 secureTextEntry
                 autoComplete="password"
                 error={errors?.password}
                 isRequired
                 style={styles.input}
+                placeholderTextColor="rgba(255, 255, 255, 0.4)"
               />
             </View>
-              <Button
-                title="Entrar"
-                onPress={handleLogin}
-                isLoading={isLoading}
-                disabled={isLoading}
-                style={styles.buttonWeb}
-                textStyle={{ color: '#000', fontWeight: 'bold', fontSize: 20 }}
-              />
-            <View style={styles.linksBlockWeb}>
-              <View style={styles.linksRowWeb}>
-                <ThemedText style={styles.linksLabelWeb}>
-                  Não possui conta?
-                </ThemedText>
+            
+            <Button
+              title="Entrar"
+              onPress={handleLogin}
+              isLoading={isLoading}
+              disabled={isLoading}
+              style={styles.buttonPrimary}
+              textStyle={styles.buttonPrimaryText}
+            />
+            
+            <View style={styles.linksContainer}>
+              <ThemedText style={styles.linkText}>
+                Não possui conta?{" "}
                 <ThemedText
-                  style={styles.linkPrimaryWeb}
+                  style={styles.linkHighlight}
                   onPress={navigateToRegister}
-                  accessibilityRole="link"
-                  accessibilityLabel="Cadastre-se"
                 >
                   Cadastre-se
                 </ThemedText>
-              </View>
+              </ThemedText>
               <ThemedText
-                style={styles.linkSecondaryWeb}
+                style={styles.linkSecondary}
                 onPress={navigateBack}
-                accessibilityRole="link"
-                accessibilityLabel="Voltar para home"
               >
                 Voltar para home
               </ThemedText>
@@ -166,124 +167,88 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0E27",
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 48,
-    paddingBottom: 32,
+    paddingTop: Platform.OS === "ios" ? 80 : 60,
+    paddingBottom: 40,
   },
   innerContent: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
     width: "100%",
   },
   title: {
-    textAlign: "left",
-    fontSize: 38,
-    fontWeight: Platform.OS === "ios" ? "800" : "bold",
+    fontSize: 32,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
     color: "#fff",
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.6)",
     marginBottom: 32,
-    lineHeight: 44,
-    letterSpacing: 0.2,
-    alignSelf: "flex-start",
   },
   form: {
     width: "100%",
-    maxWidth: 420,
-    alignSelf: "center",
-    backgroundColor: "transparent",
-    padding: 0,
-    margin: 0,
-    marginTop: 0,
-    marginBottom: 0,
   },
   inputGroup: {
-    marginBottom: 12,
-    width: "100%",
+    marginBottom: 20,
+  },
+  inputLabel: {
+    color: "#fff",
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    fontSize: 14,
+    marginBottom: 8,
+    letterSpacing: 0.3,
   },
   input: {
-    width: "100%",
-    backgroundColor: "#F3F6FF",
+    backgroundColor: "#1A1F3A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: "#222",
-    borderWidth: 0,
-    marginBottom: 8,
-    alignSelf: "stretch",
-  },
-  inputLabel: {
     color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 4,
-    marginLeft: 2,
   },
-  linkWeb: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    textDecorationLine: "underline",
-    marginBottom: 8,
-    alignSelf: "flex-start",
-    paddingVertical: 4,
-    paddingHorizontal: 2,
-  },
-  buttonWeb: {
-    backgroundColor: "#E6E6E6",
+  buttonPrimary: {
+    backgroundColor: "#5B67CA",
     borderRadius: 12,
-    paddingVertical: 14,
+    paddingVertical: 16,
     marginTop: 8,
     marginBottom: 24,
-    alignSelf: "stretch",
-    width: "100%",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowColor: "#5B67CA",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  buttonWebText: {
-    color: "#222",
-    fontWeight: "bold",
-    fontSize: 20,
-    letterSpacing: 0.1,
+  buttonPrimaryText: {
+    color: "#fff",
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    fontSize: 16,
+    letterSpacing: 0.5,
   },
-  linksBlockWeb: {
-    marginTop: 8,
-    width: "100%",
-    alignItems: "flex-start",
-  },
-  linksRowWeb: {
-    flexDirection: "row",
+  linksContainer: {
+    gap: 12,
     alignItems: "center",
-    marginBottom: 8,
   },
-  linksLabelWeb: {
-    color: "#fff",
-    fontSize: 17,
-    marginRight: 6,
-    fontWeight: "bold",
-    opacity: 1,
+  linkText: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.7)",
+    textAlign: "center",
   },
-  linkPrimaryWeb: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 17,
-    textDecorationLine: "none",
-    paddingVertical: 0,
-    paddingHorizontal: 0,
+  linkHighlight: {
+    color: "#5B67CA",
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
   },
-  linkSecondaryWeb: {
-    color: "#fff",
-    fontSize: 17,
-    fontWeight: "bold",
-    textDecorationLine: "none",
-    opacity: 1,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
+  linkSecondary: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.5)",
+    textAlign: "center",
   },
 });

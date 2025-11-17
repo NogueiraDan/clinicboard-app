@@ -1,45 +1,39 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo } from "react";
 import {
   Alert,
   Linking,
+  Platform,
   RefreshControl,
   ScrollView,
+  StatusBar,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { PatientInfoCard } from "@/components/patient/patient-info-card";
-import { PatientInfoRow } from "@/components/patient/patient-info-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Metrics } from "@/constants/metrics";
 import { usePatient } from "@/hooks/tanstack/use-patient";
 import { formatters } from "@/utils/formatters";
 
 interface ActionButtonProps {
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   onPress: () => void;
-  variant?: "primary" | "secondary" | "danger";
+  variant?: "primary" | "secondary";
 }
 
 const ActionButton = React.memo<ActionButtonProps>(
   ({ icon, title, onPress, variant = "secondary" }) => {
-    // Forçar padrão escuro para botões secundários
     const buttonColors = useMemo(() => {
-      switch (variant) {
-        case "primary":
-          return { background: "#0096FF", text: "#fff", icon: "#fff" };
-        case "danger":
-          return { background: "#FF6B6B", text: "#fff", icon: "#fff" };
-        default:
-          return { background: "#111a", text: "#fff", icon: "#fff" };
+      if (variant === "primary") {
+        return { background: "#5B67CA", text: "#fff" };
       }
+      return { background: "#1A1F3A", text: "#fff" };
     }, [variant]);
 
     return (
@@ -49,17 +43,12 @@ const ActionButton = React.memo<ActionButtonProps>(
           { backgroundColor: buttonColors.background },
         ]}
         onPress={onPress}
-        activeOpacity={Metrics.touchableOpacity}
+        activeOpacity={0.8}
       >
-        <IconSymbol
-          name={icon as any}
-          size={Metrics.iconSize.md}
-          color={buttonColors.icon}
-        />
-        <ThemedText
-          style={[styles.actionButtonText, { color: buttonColors.text }]}
-          numberOfLines={1}
-        >
+        <View style={styles.actionIconContainer}>
+          <Ionicons name={icon} size={24} color={buttonColors.text} />
+        </View>
+        <ThemedText style={[styles.actionButtonText, { color: buttonColors.text }]}>
           {title}
         </ThemedText>
       </TouchableOpacity>
@@ -71,8 +60,6 @@ ActionButton.displayName = "ActionButton";
 
 export default function PatientDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const insets = useSafeAreaInsets();
-
   const { patient, isFetching, error, refetch } = usePatient(id || "");
 
   const formattedData = useMemo(() => {
@@ -159,12 +146,8 @@ export default function PatientDetailsScreen() {
 
   if (isFetching) {
     return (
-      <ThemedView
-        style={[
-          styles.container,
-          { backgroundColor: "#000", paddingTop: insets.top },
-        ]}
-      >
+      <ThemedView style={styles.container}>
+        <StatusBar barStyle="light-content" />
         <LoadingSpinner />
       </ThemedView>
     );
@@ -172,103 +155,55 @@ export default function PatientDetailsScreen() {
 
   if (error || !patient) {
     return (
-      <ThemedView
-        style={[
-          styles.container,
-          { backgroundColor: "#000", paddingTop: insets.top },
-        ]}
-      >
-        <ThemedView style={[styles.header, { backgroundColor: "#000" }]}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleGoBack}
-            activeOpacity={Metrics.touchableOpacity}
-          >
-            <IconSymbol
-              name="chevron.left"
-              size={Metrics.iconSize.md}
-              color="#fff"
-            />
+      <ThemedView style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <ThemedText type="title" style={{ color: "#fff" }}>
-            Erro
-          </ThemedText>
-        </ThemedView>
+          <ThemedText style={styles.headerTitle}>Erro</ThemedText>
+          <View style={styles.backButton} />
+        </View>
 
-        <ThemedView style={styles.errorContainer}>
-          <IconSymbol
-            name="exclamationmark.triangle"
-            size={64}
-            color="#fff"
-            style={styles.errorIcon}
-          />
-          <ThemedText
-            type="subtitle"
-            style={[styles.errorTitle, { color: "#fff" }]}
-          >
+        <View style={styles.errorContainer}>
+          <Ionicons name="warning" size={80} color="rgba(255, 255, 255, 0.2)" />
+          <ThemedText style={styles.errorTitle}>
             {error?.message || "Erro desconhecido"}
           </ThemedText>
           <Button
             title="Tentar Novamente"
-            onPress={refetch}
+            onPress={() => refetch()}
             variant="primary"
+            style={styles.retryButton}
           />
-        </ThemedView>
+        </View>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView
-      style={[
-        styles.container,
-        { backgroundColor: "#000", paddingTop: insets.top },
-      ]}
-    >
+    <ThemedView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
       {/* Header */}
-      <ThemedView
-        style={[
-          styles.header,
-          {
-            backgroundColor: "#000",
-            borderRadius: 0,
-            elevation: 0,
-            shadowOpacity: 0,
-            borderWidth: 0,
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={handleGoBack}
-          activeOpacity={Metrics.touchableOpacity}
-        >
-          <IconSymbol
-            name="chevron.left"
-            size={Metrics.iconSize.md}
-            color="#fff"
-          />
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <ThemedView
-          style={[styles.headerContent, { backgroundColor: "transparent" }]}
-        >
-          <ThemedText type="title" numberOfLines={1} style={{ color: "#fff" }}>
+        <View style={styles.headerContent}>
+          <ThemedText style={styles.headerTitle} numberOfLines={1}>
             {patient.name}
           </ThemedText>
-          <ThemedText style={[styles.headerSubtitle, { color: "#fff9" }]}>
-            {" "}
-            {/* branco translúcido */}
+          <ThemedText style={styles.headerSubtitle}>
             Detalhes do paciente
           </ThemedText>
-        </ThemedView>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={handleEditPatient}
-          activeOpacity={Metrics.touchableOpacity}
-        >
-          <IconSymbol name="pencil" size={Metrics.iconSize.md} color="#fff" />
+        </View>
+        <TouchableOpacity style={styles.editButton} onPress={handleEditPatient}>
+          <Ionicons name="create-outline" size={24} color="#fff" />
         </TouchableOpacity>
-      </ThemedView>
+      </View>
 
       <ScrollView
         style={styles.scrollContainer}
@@ -278,85 +213,60 @@ export default function PatientDetailsScreen() {
           <RefreshControl
             refreshing={isFetching}
             onRefresh={refetch}
-            tintColor="#fff"
-            colors={["#fff"]}
+            tintColor="#5B67CA"
+            colors={["#5B67CA"]}
           />
         }
       >
         {/* Ações Rápidas */}
-        <ThemedView
-          style={[styles.actionsContainer, { backgroundColor: "#000" }]}
-        >
+        <View style={styles.actionsContainer}>
           <ActionButton
-            icon="phone.fill"
+            icon="call"
             title="Ligar"
             onPress={handleCallPatient}
             variant="primary"
           />
           <ActionButton
-            icon="calendar.badge.plus"
+            icon="calendar"
             title="Agendar"
             onPress={handleScheduleAppointment}
           />
-          {/* <ActionButton
-            icon="phone.badge.plus"
-            title="Emergência"
-            onPress={handleCallEmergency}
-          /> */}
-        </ThemedView>
+        </View>
 
         {/* Informações Pessoais */}
-        <PatientInfoCard
-          title="Informações Pessoais"
-          icon="person.circle"
-          isEditable
-          onEdit={handleEditPatient}
-          cardStyle={{ backgroundColor: "#fff", borderColor: "#fff2" }}
-          titleStyle={{ color: "#000" }}
-          iconColor="#000"
-        >
-          <PatientInfoRow
-            label="Nome Completo"
-            value={patient.name}
-            valueStyle={{ color: "#000" }}
-          />
-          <PatientInfoRow
-            label="Email"
-            value={patient.email}
-            valueStyle={{ color: "#000" }}
-          />
-          <PatientInfoRow
-            label="Telefone"
-            value={formattedData?.phone || ""}
-            valueStyle={{ color: "#000" }}
-          />
-        </PatientInfoCard>
+        <View style={styles.infoCard}>
+          <View style={styles.infoHeader}>
+            <Ionicons name="person-circle" size={24} color="#5B67CA" />
+            <ThemedText style={styles.infoTitle}>Informações Pessoais</ThemedText>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <ThemedText style={styles.infoLabel}>Nome Completo</ThemedText>
+            <ThemedText style={styles.infoValue}>{patient.name}</ThemedText>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <ThemedText style={styles.infoLabel}>Email</ThemedText>
+            <ThemedText style={styles.infoValue}>{patient.email}</ThemedText>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <ThemedText style={styles.infoLabel}>Telefone</ThemedText>
+            <ThemedText style={styles.infoValue}>{formattedData?.phone || ""}</ThemedText>
+          </View>
+        </View>
 
-        {/* Ações Perigosas */}
-        <ThemedView
-          style={[
-            styles.dangerZone,
-            {
-              backgroundColor: "#000",
-              borderRadius: 16,
-              marginBottom: 24,
-              marginTop: 16,
-              paddingBottom: 16,
-            },
-          ]}
-        >
-          <ThemedText
-            type="defaultSemiBold"
-            style={[styles.dangerTitle, { color: "#FF6B6B" }]}
-          >
-            Zona de Perigo
-          </ThemedText>
+        {/* Zona de Perigo */}
+        <View style={styles.dangerZone}>
+          <ThemedText style={styles.dangerTitle}>Zona de Perigo</ThemedText>
           <Button
             title="Excluir Paciente"
             onPress={handleDeletePatient}
             variant="secondary"
+            style={styles.deleteButton}
+            textStyle={styles.deleteButtonText}
           />
-        </ThemedView>
+        </View>
       </ScrollView>
     </ThemedView>
   );
@@ -365,76 +275,160 @@ export default function PatientDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#0A0E27",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Metrics.padding.lg,
-    paddingVertical: Metrics.padding.md,
-    gap: Metrics.margin.md,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingBottom: 16,
+    gap: 12,
   },
   backButton: {
-    padding: Metrics.padding.sm,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerContent: {
     flex: 1,
   },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
+    color: "#fff",
+    letterSpacing: 0.3,
+  },
   headerSubtitle: {
-    fontSize: Metrics.fontSize.sm,
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.6)",
     marginTop: 2,
   },
   editButton: {
-    padding: Metrics.padding.sm,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   scrollContainer: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: Metrics.padding.lg,
-    paddingBottom: Metrics.padding.xl,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
   },
   actionsContainer: {
     flexDirection: "row",
-    gap: Metrics.margin.sm,
-    marginBottom: Metrics.margin.lg,
+    gap: 12,
+    marginBottom: 24,
   },
   actionButton: {
     flex: 1,
-    flexDirection: "column",
     alignItems: "center",
-    paddingVertical: Metrics.padding.md,
-    paddingHorizontal: Metrics.padding.sm,
-    borderRadius: Metrics.borderRadius.lg,
-    gap: Metrics.margin.xs,
+    paddingVertical: 20,
+    borderRadius: 16,
+    gap: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  actionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   actionButtonText: {
-    fontSize: Metrics.fontSize.sm,
-    fontWeight: "600",
+    fontSize: 14,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    letterSpacing: 0.3,
+  },
+  infoCard: {
+    backgroundColor: "#1A1F3A",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  infoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+  },
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "#fff",
+    letterSpacing: 0.3,
+  },
+  infoRow: {
+    marginBottom: 16,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.5)",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: Platform.OS === "ios" ? "500" : "normal",
+  },
+  dangerZone: {
+    marginTop: 8,
+  },
+  dangerTitle: {
+    fontSize: 14,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "#FF6B6B",
+    marginBottom: 16,
     textAlign: "center",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  deleteButton: {
+    backgroundColor: "rgba(255, 107, 107, 0.1)",
+    borderWidth: 1,
+    borderColor: "#FF6B6B",
+  },
+  deleteButtonText: {
+    color: "#FF6B6B",
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: Metrics.padding.xl,
-  },
-  errorIcon: {
-    marginBottom: Metrics.margin.lg,
-    opacity: 0.3,
+    paddingHorizontal: 32,
   },
   errorTitle: {
+    fontSize: 18,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "#fff",
     textAlign: "center",
-    marginBottom: Metrics.margin.lg,
+    marginTop: 16,
+    marginBottom: 24,
   },
-  dangerZone: {
-    marginTop: Metrics.margin.xl,
-    paddingTop: Metrics.padding.lg,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#FF6B6B30",
-  },
-  dangerTitle: {
-    color: "#FF6B6B",
-    marginBottom: Metrics.margin.md,
-    textAlign: "center",
+  retryButton: {
+    backgroundColor: "#5B67CA",
+    paddingHorizontal: 32,
   },
 });

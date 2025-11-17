@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { Appointment } from "@/types";
+import { Ionicons } from '@expo/vector-icons';
 import React from "react";
 import { Pressable, PressableStateCallbackType, StyleSheet, View } from "react-native";
 
@@ -12,20 +13,34 @@ interface AppointmentsListProps {
 interface AppointmentItemProps {
   appointment: Appointment;
   onPress?: (appointment: Appointment) => void;
+  index: number;
 }
 
+const APPOINTMENT_COLORS = [
+  { bg: '#E8F5E9', border: '#4CAF50', text: '#2E7D32', icon: 'fitness' as const },
+  { bg: '#FFF3E0', border: '#FF9800', text: '#E65100', icon: 'calendar' as const },
+  { bg: '#E3F2FD', border: '#2196F3', text: '#0D47A1', icon: 'medkit' as const },
+  { bg: '#FCE4EC', border: '#E91E63', text: '#880E4F', icon: 'time' as const },
+];
+
 const AppointmentItem = React.memo<AppointmentItemProps>(
-  ({ appointment, onPress }) => {
+  ({ appointment, onPress, index }) => {
     const handlePress = React.useCallback(() => {
       onPress?.(appointment);
     }, [appointment, onPress]);
 
+    const colorScheme = APPOINTMENT_COLORS[index % APPOINTMENT_COLORS.length];
+
     const getCardStyle = React.useCallback(
       ({ pressed }: PressableStateCallbackType) => [
         styles.appointmentCard,
+        { 
+          backgroundColor: colorScheme.bg,
+          borderLeftColor: colorScheme.border,
+        },
         pressed && styles.appointmentCardPressed,
       ],
-      []
+      [colorScheme]
     );
 
     return (
@@ -33,16 +48,29 @@ const AppointmentItem = React.memo<AppointmentItemProps>(
         style={getCardStyle}
         onPress={handlePress}
         android_ripple={{
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: colorScheme.border,
           borderless: false,
         }}
         accessibilityRole="button"
         accessibilityLabel={`Agendamento às ${appointment.hour} - ${appointment.type}`}
         accessibilityHint="Toque para ver detalhes do agendamento"
       >
-        <ThemedText style={styles.appointmentText}>
-          {appointment.hour} - {appointment.type}
-        </ThemedText>
+        <View style={styles.appointmentIcon}>
+          <Ionicons name={colorScheme.icon} size={20} color={colorScheme.border} />
+        </View>
+        <View style={styles.appointmentInfo}>
+          <ThemedText style={[styles.appointmentTitle, { color: colorScheme.text }]}>
+            {appointment.type}
+          </ThemedText>
+          <ThemedText style={[styles.appointmentTime, { color: colorScheme.text }]}>
+            {appointment.hour}
+          </ThemedText>
+        </View>
+        <View style={styles.appointmentBadge}>
+          <ThemedText style={[styles.badgeText, { color: colorScheme.border }]}>
+            All day
+          </ThemedText>
+        </View>
       </Pressable>
     );
   }
@@ -67,11 +95,12 @@ export const AppointmentsList = React.memo<AppointmentsListProps>(
 
     return (
       <View style={styles.appointmentsContainer}>
-        {appointments.map((appointment) => (
+        {appointments.map((appointment, index) => (
           <AppointmentItem 
             key={appointment.id} 
             appointment={appointment}
             onPress={onAppointmentPress}
+            index={index}
           />
         ))}
       </View>
@@ -83,43 +112,66 @@ AppointmentsList.displayName = 'AppointmentsList';
 const styles = StyleSheet.create({
   appointmentsContainer: {
     width: '100%',
-    gap: 8,
-    paddingHorizontal: 4,
+    gap: 12,
   },
   appointmentCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
-    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F5E9',
+    borderRadius: 16,
+    paddingVertical: 16,
     paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    alignSelf: 'stretch',
+    borderLeftWidth: 4,
+    borderLeftColor: '#4CAF50',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 2,
   },
   appointmentCardPressed: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    opacity: 0.8,
     transform: [{ scale: 0.98 }],
   },
-  appointmentText: {
-    color: '#fff',
+  appointmentIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  appointmentInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  appointmentTitle: {
     fontSize: 16,
     fontWeight: '600',
-    textAlign: 'center',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
+  },
+  appointmentTime: {
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.7,
+  },
+  appointmentBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   statusText: {
     color: '#fff',
-    fontSize: 16,
-    opacity: 0.85,
+    fontSize: 15,
+    opacity: 0.6,
     textAlign: 'center',
-    alignSelf: 'center',
+    paddingVertical: 24,
     fontStyle: 'italic',
   },
 });

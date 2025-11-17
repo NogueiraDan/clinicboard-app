@@ -1,21 +1,21 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
+  Platform,
   RefreshControl,
+  StatusBar,
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Metrics } from "@/constants/metrics";
-import { Fonts } from "@/constants/theme";
 import { usePatients } from "@/hooks/tanstack/use-patients";
 import { Patient } from "@/types";
     
@@ -33,38 +33,35 @@ const PatientItem = React.memo<PatientItemProps>(({ patient, onPress }) => {
     return patient.phone.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
   }, [patient.phone]);
 
+  const initials = useMemo(() => {
+    const names = patient.name.split(' ');
+    if (names.length >= 2) {
+      return `${names[0][0]}${names[1][0]}`.toUpperCase();
+    }
+    return patient.name.substring(0, 2).toUpperCase();
+  }, [patient.name]);
+
   return (
     <TouchableOpacity
-      style={[styles.patientItem, { borderBottomColor: "#fff" }]}
+      style={styles.patientCard}
       onPress={handlePress}
-      activeOpacity={Metrics.touchableOpacity}
+      activeOpacity={0.8}
     >
-      <ThemedView style={[styles.patientInfo, { backgroundColor: "#000" }]}>
-        <ThemedText
-          type="defaultSemiBold"
-          numberOfLines={1}
-          style={{ color: "#fff" }}
-        >
+      <View style={styles.patientAvatar}>
+        <ThemedText style={styles.avatarText}>{initials}</ThemedText>
+      </View>
+      <View style={styles.patientInfo}>
+        <ThemedText style={styles.patientName} numberOfLines={1}>
           {patient.name}
         </ThemedText>
-        <ThemedText
-          style={[styles.patientDetail, { color: "#fff", opacity: 0.8 }]}
-          numberOfLines={1}
-        >
+        <ThemedText style={styles.patientDetail} numberOfLines={1}>
           {patient.email}
         </ThemedText>
-        <ThemedText
-          style={[styles.patientDetail, { color: "#fff", opacity: 0.8 }]}
-          numberOfLines={1}
-        >
+        <ThemedText style={styles.patientDetail} numberOfLines={1}>
           {formattedPhone}
         </ThemedText>
-      </ThemedView>
-      <IconSymbol
-        name="chevron.right"
-        size={Metrics.iconSize.md}
-        color="#fff"
-      />
+      </View>
+      <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.4)" />
     </TouchableOpacity>
   );
 });
@@ -72,8 +69,6 @@ const PatientItem = React.memo<PatientItemProps>(({ patient, onPress }) => {
 PatientItem.displayName = "PatientItem";
 
 export default function PatientsScreen() {
-  const insets = useSafeAreaInsets();
-
   const { patients, isFetching } = usePatients();
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -123,102 +118,70 @@ export default function PatientsScreen() {
 
   const renderEmptyState = useCallback(
     () => (
-      <ThemedView style={styles.emptyContainer}>
-        <IconSymbol
-          name="person.2.fill"
-          size={64}
-          color="#fff"
-          style={styles.emptyIcon}
-        />
-        <ThemedText
-          type="subtitle"
-          style={[styles.emptyTitle, { color: "#fff" }]}
-        >
+      <View style={styles.emptyContainer}>
+        <Ionicons name="people" size={80} color="rgba(255, 255, 255, 0.2)" />
+        <ThemedText style={styles.emptyTitle}>
           {searchQuery
             ? "Nenhum paciente encontrado"
             : "Nenhum paciente cadastrado"}
         </ThemedText>
-        <ThemedText
-          style={[styles.emptySubtitle, { color: "#fff", opacity: 0.7 }]}
-        >
+        <ThemedText style={styles.emptySubtitle}>
           {searchQuery
             ? "Tente buscar com outros termos"
             : "Cadastre seu primeiro paciente para começar"}
         </ThemedText>
-      </ThemedView>
+      </View>
     ),
     [searchQuery]
   );
 
   const headerComponent = useMemo(
     () => (
-      <ThemedView style={styles.header}>
-        <ThemedView
-          style={[styles.titleContainer, { backgroundColor: "#000" }]}
-        >
-          <ThemedText type="title" style={{ color: "#fff" }}>
-            Pacientes
-          </ThemedText>
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              { backgroundColor: "#000", borderWidth: 1, borderColor: "#fff2" },
-            ]}
-            onPress={handleAddPatient}
-            activeOpacity={Metrics.touchableOpacity}
-          >
-            <IconSymbol name="plus" size={Metrics.iconSize.md} color="#fff" />
-          </TouchableOpacity>
-        </ThemedView>
-
-        <ThemedView style={[styles.searchContainer, { borderColor: "#fff" }]}>
-          <IconSymbol
-            name="magnifyingglass"
-            size={Metrics.iconSize.md}
-            color="#fff"
-          />
+      <View style={styles.searchSection}>
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="rgba(255, 255, 255, 0.5)" />
           <TextInput
-            style={[styles.searchInput, { color: "#fff" }]}
+            style={styles.searchInput}
             placeholder="Buscar pacientes..."
-            placeholderTextColor="#fff9"
+            placeholderTextColor="rgba(255, 255, 255, 0.5)"
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCapitalize="none"
             autoCorrect={false}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity
-              onPress={() => setSearchQuery("")}
-              style={styles.clearButton}
-            >
-              <IconSymbol
-                name="xmark.circle.fill"
-                size={Metrics.iconSize.md}
-                color="#fff"
-              />
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Ionicons name="close-circle" size={20} color="rgba(255, 255, 255, 0.5)" />
             </TouchableOpacity>
           )}
-        </ThemedView>
-      </ThemedView>
+        </View>
+      </View>
     ),
-    [searchQuery, handleAddPatient]
+    [searchQuery]
   );
 
   if (isFetching) {
     return (
-      <ThemedView style={[styles.container, { backgroundColor: "#000" }]}>
+      <ThemedView style={styles.container}>
+        <StatusBar barStyle="light-content" />
         <LoadingSpinner />
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView
-      style={[
-        styles.container,
-        { backgroundColor: "#000", paddingTop: insets.top },
-      ]}
-    >
+    <ThemedView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.headerIcon}>
+          <Ionicons name="menu" size={28} color="#fff" />
+        </TouchableOpacity>
+        <ThemedText style={styles.headerTitle}>Pacientes</ThemedText>
+        <View style={styles.headerIcon} />
+      </View>
+
       <FlatList
         data={filteredPatients}
         renderItem={renderPatientItem}
@@ -229,8 +192,8 @@ export default function PatientsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor="#fff"
-            colors={["#fff"]}
+            tintColor="#5B67CA"
+            colors={["#5B67CA"]}
           />
         }
         contentContainerStyle={styles.listContent}
@@ -240,8 +203,17 @@ export default function PatientsScreen() {
         windowSize={10}
         maxToRenderPerBatch={10}
         updateCellsBatchingPeriod={50}
-        removeClippedSubviews={true}
+        removeClippedSubviews={false}
       />
+
+      {/* FAB - Floating Action Button */}
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={handleAddPatient}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="person-add" size={28} color="#fff" />
+      </TouchableOpacity>
     </ThemedView>
   );
 }
@@ -249,80 +221,127 @@ export default function PatientsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  listContent: {
-    flexGrow: 1,
+    backgroundColor: "#0A0E27",
   },
   header: {
-    padding: Metrics.padding.lg,
-    gap: Metrics.margin.md,
-    backgroundColor: "#000",
-  },
-  titleContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingBottom: 16,
   },
-  addButton: {
+  headerIcon: {
     width: 44,
     height: 44,
-    borderRadius: Metrics.borderRadius.lg,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
+    color: "#fff",
+    letterSpacing: 0.5,
+  },
+  searchSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderRadius: Metrics.borderRadius.md,
-    paddingHorizontal: Metrics.padding.md,
-    paddingVertical: Metrics.padding.sm,
-    gap: Metrics.margin.sm,
-    backgroundColor: "#000",
-    borderColor: "#fff2",
+    backgroundColor: "#1A1F3A",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
   },
   searchInput: {
     flex: 1,
-    fontSize: Metrics.fontSize.md,
-    fontFamily: Fonts.sans,
+    fontSize: 16,
+    color: "#fff",
     minHeight: 20,
   },
-  clearButton: {
-    padding: 4,
+  listContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 100,
   },
-  patientItem: {
+  patientCard: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Metrics.padding.lg,
-    paddingVertical: Metrics.padding.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    backgroundColor: "#000",
+    backgroundColor: "#1A1F3A",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  patientAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#5B67CA",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "#fff",
   },
   patientInfo: {
     flex: 1,
     gap: 4,
-    backgroundColor: "#000",
+  },
+  patientName: {
+    fontSize: 16,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "#fff",
+    letterSpacing: 0.2,
   },
   patientDetail: {
-    fontSize: Metrics.fontSize.sm,
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.6)",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: Metrics.padding.xl,
-    paddingVertical: Metrics.padding.xl * 2,
-  },
-  emptyIcon: {
-    marginBottom: Metrics.margin.lg,
-    opacity: 0.3,
+    paddingVertical: 60,
   },
   emptyTitle: {
-    textAlign: "center",
-    marginBottom: Metrics.margin.sm,
+    fontSize: 18,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+    color: "#fff",
+    marginTop: 16,
+    marginBottom: 8,
   },
   emptySubtitle: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.6)",
     textAlign: "center",
-    fontSize: Metrics.fontSize.sm,
+  },
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#5B67CA",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#5B67CA",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 });

@@ -1,10 +1,10 @@
 import React from 'react';
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    type TouchableOpacityProps
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  type TouchableOpacityProps
 } from 'react-native';
 
 import { Colors } from '@/constants/theme';
@@ -54,7 +54,7 @@ export const Button = React.memo<ButtonProps>(({
     <TouchableOpacity
       style={buttonStyles}
       disabled={disabled || isLoading}
-      activeOpacity={0.8}
+      activeOpacity={0.65}
       {...props}
     >
       {isLoading ? (
