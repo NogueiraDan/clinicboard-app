@@ -7,16 +7,24 @@ import { useQuery } from "@tanstack/react-query";
 export function usePatients() {
   const { user } = useAuth();
 
-  const { data, isFetching } = useQuery<Patient[] | undefined>({
-    queryKey: ["schedules", user?.id],
+  const { data, isFetching, error } = useQuery<Patient[] | undefined>({
+    queryKey: ["patients", user?.id],
     queryFn: async () => {
-      const response = await businessService.findByUserId(user?.id ?? "");
+      if (!user?.id) {
+        console.log("usePatients: user.id não disponível");
+        return [];
+      }
+      console.log("usePatients: buscando pacientes para user_id:", user.id);
+      const response = await businessService.findByUserId(user.id);
+      console.log("usePatients: resposta da API:", response);
       return response;
     },
+    enabled: !!user?.id,
   });
 
   return {
     patients: data ?? [],
     isFetching,
+    error,
   };
 }

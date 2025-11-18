@@ -25,8 +25,7 @@ export default function DashboardScreen() {
   }, []);
 
   const navigateToNewAppointment = React.useCallback(() => {
-    // TODO: Implementar navegação para tela de novo agendamento
-    router.push("/(app)/patient-registration"); // Temporário
+    router.push("/(app)/new-appointment");
   }, []);
 
   const handleDateSelect = React.useCallback(
