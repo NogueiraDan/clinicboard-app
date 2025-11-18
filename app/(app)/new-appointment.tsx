@@ -9,13 +9,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-    Alert,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Alert,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function NewAppointmentScreen() {
@@ -223,6 +223,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === "ios" ? 60 : 40,
     paddingBottom: 16,
+    marginBottom: 8,
   },
   backButton: {
     width: 44,
@@ -233,7 +234,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: Platform.OS === "ios" ? "600" : "bold",
     color: "#fff",
     letterSpacing: 0.3,
@@ -249,12 +250,13 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   monthTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: Platform.OS === "ios" ? "700" : "bold",
     color: "#fff",
     marginBottom: 20,
     textTransform: "capitalize",
     letterSpacing: 0.5,
+    alignSelf: 'center',
   },
   section: {
     marginTop: 32,

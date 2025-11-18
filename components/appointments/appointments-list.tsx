@@ -181,15 +181,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   appointmentTitle: {
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: "600",
     letterSpacing: 0.3,
     marginBottom: 2,
   },
   appointmentTime: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "500",
-    opacity: 0.6,
+    opacity: 0.7,
   },
   appointmentBadge: {
     paddingHorizontal: 12,

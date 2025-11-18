@@ -339,9 +339,9 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   formCard: {
-    backgroundColor: "#1A1F3A",
+    // backgroundColor: "#1A1F3A",
     borderRadius: 16,
-    padding: 20,
+    paddingHorizontal: 16,
     marginTop: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

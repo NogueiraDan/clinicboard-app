@@ -16,10 +16,6 @@ export default function DashboardScreen() {
   const { appointments, refetchAppointments, isFetching } =
     useAppointments(date);
 
-  const navigateToPatientRegistration = React.useCallback(() => {
-    router.push("/(app)/patient-registration");
-  }, []);
-
   const navigateToPatientsList = React.useCallback(() => {
     router.push("/(app)/(tabs)/patients");
   }, []);
@@ -49,13 +45,6 @@ export default function DashboardScreen() {
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerIcon}>
           <Ionicons name="menu" size={28} color="#fff" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={navigateToPatientRegistration}
-        >
-          <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -148,6 +137,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textTransform: "capitalize",
     letterSpacing: 0.5,
+    alignSelf: 'center',
   },
   actionButtons: {
     marginTop: 24,

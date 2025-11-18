@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   infoTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: Platform.OS === "ios" ? "600" : "bold",
     color: "#fff",
     letterSpacing: 0.3,
@@ -382,14 +382,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   infoLabel: {
-    fontSize: 12,
-    color: "rgba(255, 255, 255, 0.5)",
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.6)",
     marginBottom: 6,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   infoValue: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#fff",
     fontWeight: Platform.OS === "ios" ? "500" : "normal",
   },

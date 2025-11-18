@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     minWidth: 160,
   },
   aboutButtonText: {
-    color: '#5B67CA',
+    color: '#fff',
     fontWeight: Platform.OS === 'ios' ? '600' : 'bold',
     fontSize: 16,
     letterSpacing: 0.3,

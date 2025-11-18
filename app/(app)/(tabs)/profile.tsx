@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
   userEmail: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.6)",
+    color: "rgba(255, 255, 255, 0.8)",
   },
   badgeContainer: {
     alignSelf: "flex-start",
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: Platform.OS === "ios" ? "600" : "bold",
-    color: "#5B67CA",
+    color: "#FFF",
     backgroundColor: "rgba(91, 103, 202, 0.15)",
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   },
   optionSubtitle: {
     fontSize: 13,
-    color: "rgba(255, 255, 255, 0.5)",
+    color: "rgba(255, 255, 255, 0.8)",
   },
   logoutSection: {
     paddingHorizontal: 24,

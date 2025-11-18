@@ -1,16 +1,17 @@
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/ui/button";
+import { usePatient } from "@/hooks/tanstack/use-patient";
 import { Appointment } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import {
-    Modal,
-    Platform,
-    StyleSheet,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Modal,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 
 interface AppointmentDetailsModalProps {
@@ -22,6 +23,7 @@ interface AppointmentDetailsModalProps {
 export const AppointmentDetailsModal: React.FC<
   AppointmentDetailsModalProps
 > = ({ visible, appointment, onClose }) => {
+  const { patient } = usePatient(appointment?.patient_id || "");
   const handleViewPatient = React.useCallback(() => {
     if (appointment?.patient_id) {
       onClose();
@@ -44,6 +46,11 @@ export const AppointmentDetailsModal: React.FC<
       year: "numeric",
     });
   }, [appointment?.date]);
+
+  enum APPOINTMENT_TYPE {
+    MARCACAO = "Consulta Marcada",
+    REMARCACAO = "Consulta Remarcada",
+  }
 
   if (!appointment) return null;
 
@@ -120,6 +127,25 @@ export const AppointmentDetailsModal: React.FC<
                   </View>
                 </View>
 
+                {/* Patient Info */}
+                <View style={styles.infoCard}>
+                  <View style={styles.infoRow}>
+                    <View style={styles.infoIconContainer}>
+                      <Ionicons
+                        name="person-outline"
+                        size={20}
+                        color="#5B67CA"
+                      />
+                    </View>
+                    <View style={styles.infoTextContainer}>
+                      <ThemedText style={styles.infoLabel}>Paciente</ThemedText>
+                      <ThemedText style={styles.infoValue}>
+                        Paciente: {patient?.name}
+                      </ThemedText>
+                    </View>
+                  </View>
+                </View>
+                
                 {/* Type Info */}
                 <View style={styles.infoCard}>
                   <View style={styles.infoRow}>
@@ -133,26 +159,7 @@ export const AppointmentDetailsModal: React.FC<
                     <View style={styles.infoTextContainer}>
                       <ThemedText style={styles.infoLabel}>Tipo</ThemedText>
                       <ThemedText style={styles.infoValue}>
-                        {appointment.type}
-                      </ThemedText>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Patient ID Info (temporary - will be replaced with patient name) */}
-                <View style={styles.infoCard}>
-                  <View style={styles.infoRow}>
-                    <View style={styles.infoIconContainer}>
-                      <Ionicons
-                        name="person-outline"
-                        size={20}
-                        color="#5B67CA"
-                      />
-                    </View>
-                    <View style={styles.infoTextContainer}>
-                      <ThemedText style={styles.infoLabel}>Paciente</ThemedText>
-                      <ThemedText style={styles.infoValue}>
-                        ID: {appointment.patient_id}
+                        {APPOINTMENT_TYPE[appointment.type as keyof typeof APPOINTMENT_TYPE]}
                       </ThemedText>
                     </View>
                   </View>
@@ -168,7 +175,7 @@ export const AppointmentDetailsModal: React.FC<
                   textStyle={styles.primaryButtonText}
                 />
                 <Button
-                  title="Cancelar Agendamento"
+                  title="Cancelar"
                   onPress={handleCancelAppointment}
                   style={styles.dangerButton}
                   textStyle={styles.dangerButtonText}
@@ -270,7 +277,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   infoLabel: {
-    fontSize: 12,
+    fontSize: 16,
     color: "rgba(255, 255, 255, 0.5)",
     fontWeight: Platform.OS === "ios" ? "600" : "bold",
     letterSpacing: 0.5,
@@ -310,6 +317,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderWidth: 1,
     borderColor: "rgba(255, 59, 48, 0.3)",
+    width: "50%",
+    alignSelf: "center",
   },
   dangerButtonText: {
     color: "#FF3B30",

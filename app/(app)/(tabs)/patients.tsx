@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   },
   patientDetail: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.6)",
+    color: "rgba(255, 255, 255, 0.8)",
   },
   emptyContainer: {
     flex: 1,

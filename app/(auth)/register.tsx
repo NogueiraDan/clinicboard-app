@@ -2,13 +2,13 @@ import { formatters } from "@/utils/formatters";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
 } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -92,7 +92,7 @@ export default function RegisterScreen() {
   };
 
   const navigateBack = () => {
-    router.back();
+    router.push("/(auth)/onboarding");
   };
 
   return (
@@ -107,13 +107,11 @@ export default function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.innerContent}>
-          <ThemedText style={styles.title}>
-            Criar Conta
-          </ThemedText>
+          <ThemedText style={styles.title}>Criar Conta</ThemedText>
           <ThemedText style={styles.subtitle}>
             Preencha os dados para criar sua conta
           </ThemedText>
-          
+
           <View style={styles.form}>
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Nome Completo</ThemedText>
@@ -129,7 +127,7 @@ export default function RegisterScreen() {
                 placeholderTextColor="rgba(255, 255, 255, 0.4)"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Email</ThemedText>
               <Input
@@ -147,15 +145,18 @@ export default function RegisterScreen() {
                 placeholderTextColor="rgba(255, 255, 255, 0.4)"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Telefone</ThemedText>
               <View style={styles.phoneContainer}>
                 <ThemedText style={styles.phonePrefix}>+55</ThemedText>
                 <Input
-                  value={form.contact.replace(/^\+55/, '')}
+                  value={form.contact.replace(/^\+55/, "")}
                   onChangeText={(value) => {
-                    setForm((prev) => ({ ...prev, contact: formatters.formatContactToBrazilE164(value) }));
+                    setForm((prev) => ({
+                      ...prev,
+                      contact: formatters.formatContactToBrazilE164(value),
+                    }));
                   }}
                   placeholder="11987654321"
                   keyboardType="phone-pad"
@@ -169,7 +170,7 @@ export default function RegisterScreen() {
                 />
               </View>
             </View>
-            
+
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Senha</ThemedText>
               <Input
@@ -186,7 +187,7 @@ export default function RegisterScreen() {
                 placeholderTextColor="rgba(255, 255, 255, 0.4)"
               />
             </View>
-            
+
             <Button
               title="Criar Conta"
               onPress={handleRegister}
@@ -195,7 +196,7 @@ export default function RegisterScreen() {
               style={styles.buttonPrimary}
               textStyle={styles.buttonPrimaryText}
             />
-            
+
             <View style={styles.linksContainer}>
               <ThemedText style={styles.linkText}>
                 Já possui conta?{" "}
@@ -206,10 +207,7 @@ export default function RegisterScreen() {
                   Entrar
                 </ThemedText>
               </ThemedText>
-              <ThemedText
-                style={styles.linkSecondary}
-                onPress={navigateBack}
-              >
+              <ThemedText style={styles.linkSecondary} onPress={navigateBack}>
                 Voltar para home
               </ThemedText>
             </View>

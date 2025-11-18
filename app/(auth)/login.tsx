@@ -72,7 +72,7 @@ export default function LoginScreen() {
   };
 
   const navigateBack = () => {
-    router.back();
+    router.push("/(auth)/onboarding");
   };
 
   return (
