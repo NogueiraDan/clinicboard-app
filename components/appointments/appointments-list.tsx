@@ -24,17 +24,17 @@ interface AppointmentItemProps {
 const APPOINTMENT_TYPE = {
   MARCACAO: {
     title: "Marcado",
-    bg: "#E8F5E9",
-    border: "#4CAF50",
-    text: "#2E7D32",
+    bg: "rgba(91, 103, 202, 0.08)",
+    border: "#5B67CA",
+    text: "#fff",
     icon: "calendar" as const,
   },
   REMARCACAO: {
     title: "Remarcado",
-    bg: "#E3F2FD",
-    border: "#2196F3",
-    text: "#0D47A1",
-    icon: "calendar" as const,
+    bg: "rgba(124, 58, 237, 0.08)",
+    border: "#7C3AED",
+    text: "#fff",
+    icon: "refresh" as const,
   },
 } as const;
 
@@ -75,7 +75,7 @@ const AppointmentItem = React.memo<AppointmentItemProps>(
         <View style={styles.appointmentIcon}>
           <Ionicons
             name={colorScheme.icon}
-            size={20}
+            size={24}
             color={colorScheme.border}
           />
         </View>
@@ -147,44 +147,49 @@ const styles = StyleSheet.create({
   appointmentCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: "#1A1F3A",
     borderRadius: 16,
-    paddingVertical: 16,
+    paddingVertical: 18,
     paddingHorizontal: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: "#4CAF50",
+    borderLeftWidth: 3,
+    borderLeftColor: "#5B67CA",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.06)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
   },
   appointmentCardPressed: {
     opacity: 0.8,
     transform: [{ scale: 0.98 }],
   },
   appointmentIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(91, 103, 202, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: 14,
+    borderWidth: 1,
+    borderColor: "rgba(91, 103, 202, 0.3)",
   },
   appointmentInfo: {
     flex: 1,
     gap: 4,
   },
   appointmentTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
+    marginBottom: 2,
   },
   appointmentTime: {
     fontSize: 14,
     fontWeight: "500",
-    opacity: 0.7,
+    opacity: 0.6,
   },
   appointmentBadge: {
     paddingHorizontal: 12,
