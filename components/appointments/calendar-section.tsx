@@ -2,8 +2,9 @@ import { ThemedText } from "@/components/themed-text";
 import { calendarTheme } from "@/constants/theme";
 import { Appointment } from "@/types";
 import React from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Calendar } from "react-native-calendars";
+import { AppointmentDetailsModal } from "./appointment-details-modal";
 import { AppointmentsList } from "./appointments-list";
 
 interface CalendarSectionProps {
@@ -17,6 +18,8 @@ export const CalendarSection = React.memo<CalendarSectionProps>(
     const [selectedDate, setSelectedDate] = React.useState<string>(
       new Date().toISOString().split("T")[0]
     );
+    const [selectedAppointment, setSelectedAppointment] = React.useState<Appointment | null>(null);
+    const [isModalVisible, setIsModalVisible] = React.useState(false);
 
     const handleDayPress = React.useCallback(
       (day: { dateString: string }) => {
@@ -28,27 +31,16 @@ export const CalendarSection = React.memo<CalendarSectionProps>(
 
     const handleAppointmentPress = React.useCallback(
       (appointment: Appointment) => {
-        Alert.alert(
-          "Detalhes do Agendamento",
-          `Horário: ${appointment.hour}\nTipo: ${appointment.type}`,
-          [
-            {
-              text: "Fechar",
-              style: "cancel",
-            },
-            {
-              text: "Ver Detalhes",
-              style: "default",
-              onPress: () => {
-                // TODO: Implementar navegação para tela de detalhes
-              },
-            },
-          ],
-          { cancelable: true }
-        );
+        setSelectedAppointment(appointment);
+        setIsModalVisible(true);
       },
       []
     );
+
+    const handleCloseModal = React.useCallback(() => {
+      setIsModalVisible(false);
+      setSelectedAppointment(null);
+    }, []);
 
     const markedDates = React.useMemo(() => {
       return {
@@ -83,6 +75,13 @@ export const CalendarSection = React.memo<CalendarSectionProps>(
             onAppointmentPress={handleAppointmentPress}
           />
         </View>
+
+        {/* Appointment Details Modal */}
+        <AppointmentDetailsModal
+          visible={isModalVisible}
+          appointment={selectedAppointment}
+          onClose={handleCloseModal}
+        />
       </View>
     );
   }

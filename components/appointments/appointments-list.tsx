@@ -1,8 +1,13 @@
 import { ThemedText } from "@/components/themed-text";
 import { Appointment } from "@/types";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { Pressable, PressableStateCallbackType, StyleSheet, View } from "react-native";
+import {
+  Pressable,
+  PressableStateCallbackType,
+  StyleSheet,
+  View,
+} from "react-native";
 
 interface AppointmentsListProps {
   appointments: Appointment[] | null;
@@ -16,12 +21,22 @@ interface AppointmentItemProps {
   index: number;
 }
 
-const APPOINTMENT_COLORS = [
-  { bg: '#E8F5E9', border: '#4CAF50', text: '#2E7D32', icon: 'fitness' as const },
-  { bg: '#FFF3E0', border: '#FF9800', text: '#E65100', icon: 'calendar' as const },
-  { bg: '#E3F2FD', border: '#2196F3', text: '#0D47A1', icon: 'medkit' as const },
-  { bg: '#FCE4EC', border: '#E91E63', text: '#880E4F', icon: 'time' as const },
-];
+const APPOINTMENT_TYPE = {
+  MARCACAO: {
+    title: "Marcado",
+    bg: "#E8F5E9",
+    border: "#4CAF50",
+    text: "#2E7D32",
+    icon: "calendar" as const,
+  },
+  REMARCACAO: {
+    title: "Remarcado",
+    bg: "#E3F2FD",
+    border: "#2196F3",
+    text: "#0D47A1",
+    icon: "calendar" as const,
+  },
+} as const;
 
 const AppointmentItem = React.memo<AppointmentItemProps>(
   ({ appointment, onPress, index }) => {
@@ -29,12 +44,14 @@ const AppointmentItem = React.memo<AppointmentItemProps>(
       onPress?.(appointment);
     }, [appointment, onPress]);
 
-    const colorScheme = APPOINTMENT_COLORS[index % APPOINTMENT_COLORS.length];
+    const colorScheme =
+      APPOINTMENT_TYPE[appointment.type as keyof typeof APPOINTMENT_TYPE] ||
+      APPOINTMENT_TYPE.MARCACAO;
 
     const getCardStyle = React.useCallback(
       ({ pressed }: PressableStateCallbackType) => [
         styles.appointmentCard,
-        { 
+        {
           backgroundColor: colorScheme.bg,
           borderLeftColor: colorScheme.border,
         },
@@ -56,13 +73,22 @@ const AppointmentItem = React.memo<AppointmentItemProps>(
         accessibilityHint="Toque para ver detalhes do agendamento"
       >
         <View style={styles.appointmentIcon}>
-          <Ionicons name={colorScheme.icon} size={20} color={colorScheme.border} />
+          <Ionicons
+            name={colorScheme.icon}
+            size={20}
+            color={colorScheme.border}
+          />
         </View>
         <View style={styles.appointmentInfo}>
-          <ThemedText style={[styles.appointmentTitle, { color: colorScheme.text }]}>
-            {appointment.type}
+          <ThemedText
+            style={[styles.appointmentTitle, { color: colorScheme.text }]}
+          >
+            {APPOINTMENT_TYPE[appointment.type as keyof typeof APPOINTMENT_TYPE]
+              ?.title || appointment.type}
           </ThemedText>
-          <ThemedText style={[styles.appointmentTime, { color: colorScheme.text }]}>
+          <ThemedText
+            style={[styles.appointmentTime, { color: colorScheme.text }]}
+          >
             {appointment.hour}
           </ThemedText>
         </View>
@@ -75,7 +101,7 @@ const AppointmentItem = React.memo<AppointmentItemProps>(
     );
   }
 );
-AppointmentItem.displayName = 'AppointmentItem';
+AppointmentItem.displayName = "AppointmentItem";
 
 export const AppointmentsList = React.memo<AppointmentsListProps>(
   ({ appointments, isFetching, onAppointmentPress }) => {
@@ -96,8 +122,8 @@ export const AppointmentsList = React.memo<AppointmentsListProps>(
     return (
       <View style={styles.appointmentsContainer}>
         {appointments.map((appointment, index) => (
-          <AppointmentItem 
-            key={appointment.id} 
+          <AppointmentItem
+            key={appointment.id}
             appointment={appointment}
             onPress={onAppointmentPress}
             index={index}
@@ -107,23 +133,23 @@ export const AppointmentsList = React.memo<AppointmentsListProps>(
     );
   }
 );
-AppointmentsList.displayName = 'AppointmentsList';
+AppointmentsList.displayName = "AppointmentsList";
 
 const styles = StyleSheet.create({
   appointmentsContainer: {
-    width: '100%',
+    width: "100%",
     gap: 12,
   },
   appointmentCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E8F5E9',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E8F5E9",
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderLeftWidth: 4,
-    borderLeftColor: '#4CAF50',
-    shadowColor: '#000',
+    borderLeftColor: "#4CAF50",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
@@ -137,9 +163,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   appointmentInfo: {
@@ -148,30 +174,30 @@ const styles = StyleSheet.create({
   },
   appointmentTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     letterSpacing: 0.2,
   },
   appointmentTime: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     opacity: 0.7,
   },
   appointmentBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   statusText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 15,
     opacity: 0.6,
-    textAlign: 'center',
+    textAlign: "center",
     paddingVertical: 24,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
 });
