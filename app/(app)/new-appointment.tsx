@@ -73,13 +73,7 @@ export default function NewAppointmentScreen() {
 
   // TEMPORÁRIO: Usar mock quando API não retornar pacientes (Neon fora do ar)
   const patients = apiPatients && apiPatients.length > 0 ? apiPatients : MOCK_PATIENTS;
-
-  // Debug: verificar se está buscando pacientes
   React.useEffect(() => {
-    console.log("Pacientes carregados:", patients);
-    console.log("Total de pacientes:", patients?.length);
-    console.log("isFetchingPatients:", isFetchingPatients);
-    console.log("Error ao buscar pacientes:", error);
     if (patients === MOCK_PATIENTS) {
       console.log("⚠️ Usando MOCK_PATIENTS (Neon fora do ar)");
     }
