@@ -92,9 +92,13 @@ const AppointmentItem = React.memo<AppointmentItemProps>(
             {appointment.hour}
           </ThemedText>
         </View>
-        <View style={styles.appointmentBadge}>
+        <View>
           <ThemedText style={[styles.badgeText, { color: colorScheme.border }]}>
-            All day
+            <Ionicons
+              name={"arrow-forward-circle-sharp"}
+              size={28}
+              color={colorScheme.border}
+            />
           </ThemedText>
         </View>
       </Pressable>
