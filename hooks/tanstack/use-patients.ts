@@ -11,12 +11,9 @@ export function usePatients() {
     queryKey: ["patients", user?.id],
     queryFn: async () => {
       if (!user?.id) {
-        console.log("usePatients: user.id não disponível");
         return [];
       }
-      console.log("usePatients: buscando pacientes para user_id:", user.id);
       const response = await businessService.findByUserId(user.id);
-      console.log("usePatients: resposta da API:", response);
       return response;
     },
     enabled: !!user?.id,

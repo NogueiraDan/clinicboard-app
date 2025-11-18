@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectOption } from "@/components/ui/select";
 import { useAppointments } from "@/hooks/tanstack/use-appointments";
 import { usePatients } from "@/hooks/tanstack/use-patients";
-import { Patient } from "@/types";
+import { AVAILABLE_TIMES, MOCK_PATIENTS } from "@/utils/mocks";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -17,49 +17,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-
-// Mock de horários disponíveis (08:00 - 21:00)
-const AVAILABLE_TIMES = [
-  "08:00", "09:00", "10:00", "11:00", "12:00",
-  "13:00", "14:00", "15:00", "16:00", "17:00",
-  "18:00", "19:00", "20:00", "21:00",
-];
-
-// Mock de pacientes (temporário - remover quando API voltar)
-const MOCK_PATIENTS: Patient[] = [
-  {
-    id: "1",
-    name: "João Silva",
-    email: "joao.silva@email.com",
-    phone: "+5511987654321",
-    user_id: "mock-user",
-    age: "35",
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria.santos@email.com",
-    phone: "+5511976543210",
-    user_id: "mock-user",
-    age: "28",
-  },
-  {
-    id: "3",
-    name: "Pedro Oliveira",
-    email: "pedro.oliveira@email.com",
-    phone: "+5511965432109",
-    user_id: "mock-user",
-    age: "42",
-  },
-  {
-    id: "4",
-    name: "Ana Costa",
-    email: "ana.costa@email.com",
-    phone: "+5511954321098",
-    user_id: "mock-user",
-    age: "31",
-  },
-];
 
 export default function NewAppointmentScreen() {
   const [selectedDate, setSelectedDate] = useState<string>(
@@ -101,7 +58,6 @@ export default function NewAppointmentScreen() {
 
   // Opções de pacientes para o Select
   const patientOptions: SelectOption[] = useMemo(() => {
-    console.log("Gerando patientOptions:", patients);
     if (!patients || patients.length === 0) return [];
     return patients
       .map(patient => ({
