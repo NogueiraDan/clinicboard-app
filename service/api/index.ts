@@ -1,29 +1,73 @@
 import axios from "axios";
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 
 import { fetchHeaders } from "@/utils/fetch-header";
+import { API_CONFIG } from "@/constants/config";
 import type { InternalAxiosRequestConfig } from "axios";
 
 const getBaseURL = () => {
-  // Se está em desenvolvimento no emulator
-  if (__DEV__ && Constants.platform?.android) {
-    return 'http://10.0.2.2:8080';
+  // ⚠️ IMPORTANTE: Substitua pelo IP da sua máquina
+  const LOCAL_IP = "192.168.2.101"; // 👈 ALTERE AQUI PARA O SEU IP
+
+  // Desenvolvimento - Emulador Android
+  if (
+    __DEV__ &&
+    Constants.platform?.android &&
+    Constants.appOwnership === "expo"
+  ) {
+    return `http://${LOCAL_IP}:8080`;
   }
-  
-  // Se está em desenvolvimento no iOS simulator
-  if (__DEV__ && Constants.platform?.ios) {
-    return 'http://localhost:8080';
+
+  // Desenvolvimento - Simulador iOS
+  if (__DEV__ && Constants.platform?.ios && Constants.appOwnership === "expo") {
+    return `http://${LOCAL_IP}:8080`;
   }
-  
+
+  // Desenvolvimento - Build Local (APK Debug)
+  if (__DEV__) {
+    return `http://${LOCAL_IP}:8080`;
+  }
+
   // Produção
-  return 'https://sua-api-producao.com';
+  return "https://sua-api-producao.com";
 };
 
 const api = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
 });
 
-// Interceptor nomeado para adicionar o token de autenticação
+// Interceptor para logging (REMOVER EM PRODUÇÃO)
+api.interceptors.request.use(
+  (config) => {
+    console.log(
+      `📡 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${
+        config.url
+      }`
+    );
+    return config;
+  },
+  (error) => {
+    console.error("❌ Request Error:", error);
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => {
+    console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+    return response;
+  },
+  (error) => {
+    console.error("❌ Response Error:", error.message);
+    if (error.code === "ECONNABORTED") {
+      console.error("⏱️ Request timeout - Backend pode estar offline");
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor de autenticação
 const authTokenInterceptor = async (
   config: InternalAxiosRequestConfig
 ): Promise<InternalAxiosRequestConfig> => {
@@ -31,10 +75,11 @@ const authTokenInterceptor = async (
   if (config.headers) {
     Object.assign(config.headers, headers);
   }
-  // Se não houver headers, não faz nada (Axios já inicializa corretamente)
   return config;
 };
 
-api.interceptors.request.use(authTokenInterceptor, (error) => Promise.reject(error));
+api.interceptors.request.use(authTokenInterceptor, (error) =>
+  Promise.reject(error)
+);
 
 export default api;
