@@ -240,6 +240,7 @@ const styles = StyleSheet.create({
     fontWeight: Platform.OS === "ios" ? "700" : "bold",
     color: "#fff",
     marginBottom: 8,
+    marginTop: 16,
     letterSpacing: 0.3,
   },
   subtitle: {
@@ -280,7 +281,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.1)",
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
-    paddingVertical: 14,
+    marginTop: -14,
+    paddingVertical: 10,
     paddingHorizontal: 12,
     fontSize: 16,
     color: "#fff",

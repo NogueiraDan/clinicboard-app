@@ -1,11 +1,14 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { Dimensions, Image, Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 
 export default function OnboardingScreen() {
+  const insets = useSafeAreaInsets();
+  
   const navigateToLogin = () => {
     router.push('/(auth)/login');
   };
@@ -61,7 +64,10 @@ export default function OnboardingScreen() {
       </View>
 
       {/* Bottom Buttons */}
-      <View style={styles.bottomSection}>
+      <View style={[
+        styles.bottomSection,
+        { paddingBottom: Math.max(insets.bottom, 24) + 16 }
+      ]}>
         <Button
           title="Fazer Login"
           onPress={navigateToLogin}
@@ -146,7 +152,6 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     paddingHorizontal: 24,
-    paddingBottom: Platform.OS === 'ios' ? 50 : 32,
     gap: 12,
   },
   loginButton: {

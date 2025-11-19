@@ -33,7 +33,8 @@ const getBaseURL = () => {
 };
 
 const api = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
+  baseURL: getBaseURL(),
+  // baseURL: API_CONFIG.BASE_URL, // No device fisico
   timeout: API_CONFIG.TIMEOUT,
 });
 

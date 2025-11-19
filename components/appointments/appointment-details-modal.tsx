@@ -293,6 +293,7 @@ const styles = StyleSheet.create({
   actions: {
     paddingHorizontal: 24,
     paddingTop: 24,
+    paddingBottom: Platform.OS === "ios" ? 34 : 16,
     gap: 12,
   },
   primaryButton: {

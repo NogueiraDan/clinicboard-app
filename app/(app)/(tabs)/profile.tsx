@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from "@/components/themed-text";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -70,6 +71,7 @@ ProfileOption.displayName = "ProfileOption";
 
 export default function ProfileScreen() {
   const { user, signOut, isLoading } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleEditProfile = useCallback(() => {
     Alert.alert(
@@ -153,7 +155,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="light-content" />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -271,7 +273,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 80,
+    paddingTop: 40,
     paddingBottom: 20,
   },
   headerTitle: {
