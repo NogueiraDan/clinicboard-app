@@ -1,8 +1,8 @@
 import axios from "axios";
 import Constants from "expo-constants";
 
-import { fetchHeaders } from "@/utils/fetch-header";
 import { API_CONFIG } from "@/constants/config";
+import { fetchHeaders } from "@/utils/fetch-header";
 import type { InternalAxiosRequestConfig } from "axios";
 
 const getBaseURL = () => {
@@ -34,7 +34,7 @@ const getBaseURL = () => {
 
 const api = axios.create({
   baseURL: getBaseURL(),
-  // baseURL: API_CONFIG.BASE_URL, // No device fisico
+  // baseURL: API_CONFIG.BASE_URL, // Para device fisico
   timeout: API_CONFIG.TIMEOUT,
 });
 
