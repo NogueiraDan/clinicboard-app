@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingTop: 80,
     paddingBottom: 16,
     gap: 12,
   },
