@@ -10,6 +10,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ interface FormErrors {
 
 export default function RegisterScreen() {
   const { signUp, isLoading } = useAuth();
+  const insets = useSafeAreaInsets();
   const [form, setForm] = useState<RegisterForm>({
     name: "",
     email: "",
@@ -61,6 +63,10 @@ export default function RegisterScreen() {
       newErrors.password = "Senha é obrigatória";
     } else if (form.password.length < 6) {
       newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+    }
+
+    if (!form.contact.trim()) {
+      newErrors.contact = "Contato é obrigatório";
     }
 
     setErrors(newErrors);
@@ -149,25 +155,29 @@ export default function RegisterScreen() {
             <View style={styles.inputGroup}>
               <ThemedText style={styles.inputLabel}>Telefone</ThemedText>
               <View style={styles.phoneContainer}>
-                <ThemedText style={styles.phonePrefix}>+55</ThemedText>
-                <Input
-                  value={form.contact.replace(/^\+55/, "")}
-                  onChangeText={(value) => {
-                    setForm((prev) => ({
-                      ...prev,
-                      contact: formatters.formatContactToBrazilE164(value),
-                    }));
-                  }}
-                  placeholder="11987654321"
-                  keyboardType="phone-pad"
-                  autoCapitalize="none"
-                  autoComplete="tel"
-                  error={errors.contact}
-                  isRequired
-                  style={[styles.input, styles.phoneInput]}
-                  placeholderTextColor="rgba(255, 255, 255, 0.4)"
-                  maxLength={11}
-                />
+                <View style={styles.phonePrefix}>
+                  <ThemedText style={styles.phonePrefixText}>+55</ThemedText>
+                </View>
+                <View style={styles.phoneInputWrapper}>
+                  <Input
+                    value={form.contact.replace(/^\+55/, "")}
+                    onChangeText={(value) => {
+                      setForm((prev) => ({
+                        ...prev,
+                        contact: formatters.formatContactToBrazilE164(value),
+                      }));
+                    }}
+                    placeholder="11987654321"
+                    keyboardType="phone-pad"
+                    autoCapitalize="none"
+                    autoComplete="tel"
+                    error={errors.contact}
+                    isRequired
+                    style={styles.phoneInput}
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                    maxLength={11}
+                  />
+                </View>
               </View>
             </View>
 
@@ -197,7 +207,12 @@ export default function RegisterScreen() {
               textStyle={styles.buttonPrimaryText}
             />
 
-            <View style={styles.linksContainer}>
+            <View
+              style={[
+                { paddingBottom: Math.max(insets.bottom, 16) },
+                styles.linksContainer,
+              ]}
+            >
               <ThemedText style={styles.linkText}>
                 Já possui conta?{" "}
                 <ThemedText
@@ -273,7 +288,8 @@ const styles = StyleSheet.create({
   },
   phoneContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "stretch",
+    gap: 0,
   },
   phonePrefix: {
     backgroundColor: "#1A1F3A",
@@ -281,17 +297,34 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.1)",
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
-    marginTop: -14,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    borderRightWidth: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    minWidth: 60,
+    height: 54,
+  },
+  phonePrefixText: {
     fontSize: 16,
     color: "#fff",
-    borderRightWidth: 0,
+    fontWeight: Platform.OS === "ios" ? "600" : "bold",
+  },
+  phoneInputWrapper: {
+    flex: 1,
   },
   phoneInput: {
-    flex: 1,
+    backgroundColor: "#1A1F3A",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: "#fff",
+    borderLeftWidth: 0,
   },
   buttonPrimary: {
     backgroundColor: "#5B67CA",

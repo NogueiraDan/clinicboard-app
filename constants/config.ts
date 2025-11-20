@@ -7,7 +7,7 @@ import Constants from 'expo-constants';
  * 1. Descubra o IP da sua máquina (ipconfig/ifconfig)
  * 2. Defina em EXPO_PUBLIC_API_URL ou altere LOCAL_IP abaixo
  */
-const LOCAL_IP = '192.168.2.101'; // 👈 ALTERE PARA SEU IP
+const LOCAL_IP = '192.168.2.102'; // 👈 ALTERE PARA SEU IP
 
 export const API_CONFIG = {
   BASE_URL: __DEV__ 

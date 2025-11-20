@@ -17,6 +17,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 
 export default function NewAppointmentScreen() {
   const [selectedDate, setSelectedDate] = useState<string>(
@@ -27,6 +29,7 @@ export default function NewAppointmentScreen() {
 
   const { appointments, isFetching: isFetchingAppointments } = useAppointments(selectedDate);
   const { patients: apiPatients, isFetching: isFetchingPatients, error } = usePatients();
+    const insets = useSafeAreaInsets();
 
   // TEMPORÁRIO: Usar mock quando API não retornar pacientes (Neon fora do ar)
   const patients = apiPatients && apiPatients.length > 0 ? apiPatients : MOCK_PATIENTS;
@@ -194,7 +197,7 @@ export default function NewAppointmentScreen() {
         </View>
 
         {/* Botão de Criar Agendamento */}
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <Button
             title="Criar Agendamento"
             onPress={handleCreateAppointment}

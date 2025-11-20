@@ -7,7 +7,7 @@ import type { InternalAxiosRequestConfig } from "axios";
 
 const getBaseURL = () => {
   // ⚠️ IMPORTANTE: Substitua pelo IP da sua máquina
-  const LOCAL_IP = "192.168.2.101"; // 👈 ALTERE AQUI PARA O SEU IP
+  const LOCAL_IP = "192.168.2.102"; // 👈 ALTERE AQUI PARA O SEU IP
 
   // Desenvolvimento - Emulador Android
   if (
@@ -33,8 +33,8 @@ const getBaseURL = () => {
 };
 
 const api = axios.create({
-  baseURL: getBaseURL(),
-  // baseURL: API_CONFIG.BASE_URL, // Para device fisico
+  // baseURL: getBaseURL(),
+  baseURL: API_CONFIG.BASE_URL, // Para device fisico
   timeout: API_CONFIG.TIMEOUT,
 });
 

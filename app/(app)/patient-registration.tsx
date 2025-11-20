@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -45,6 +46,7 @@ export default function PatientRegistrationScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { createPatient } = useCreatePatient();
+  const insets = useSafeAreaInsets();
 
   const {
     values,
@@ -267,7 +269,7 @@ export default function PatientRegistrationScreen() {
         </ScrollView>
         
         {/* Footer com botões */}
-        <View style={styles.footer}>
+        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <Button
             title="Cancelar"
             onPress={handleCancel}
