@@ -1,5 +1,6 @@
+import { useForm } from "@tanstack/react-form";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -16,64 +17,42 @@ import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/providers/auth-provider";
 
-interface LoginForm {
-  email: string;
-  password: string;
-}
-
-interface FormErrors {
-  email?: string;
-  password?: string;
-}
-
 export default function LoginScreen() {
   const { signIn, isLoading } = useAuth();
-  const [form, setForm] = useState<LoginForm>({
-    email: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!form.email.trim()) {
-      newErrors.email = "Email é obrigatório";
-    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      newErrors.email = "Email inválido";
-    }
-
-    if (!form.password.trim()) {
-      newErrors.password = "Senha é obrigatória";
-    } else if (form.password.length < 6) {
-      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleLogin = async () => {
-    if (!validateForm()) return;
-
-    try {
-      await signIn(form.email, form.password);
-      // Navegação automática será feita pelo AuthProvider
-    } catch (error) {
-      Alert.alert(
-        "Erro no Login",
-        "Credenciais inválidas. Verifique seu email e senha."
-      );
-    }
-  };
-
-  const navigateToRegister = () => {
+  // Callbacks memoizados para navegação
+  const navigateToRegister = useCallback(() => {
     router.push("/(auth)/register");
-  };
+  }, []);
 
-  const navigateBack = () => {
+  const navigateBack = useCallback(() => {
     router.push("/(auth)/onboarding");
-  };
+  }, []);
+
+  // Inicialização do TanStack Form
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        await signIn(value.email, value.password);
+        // Navegação automática será feita pelo AuthProvider
+      } catch {
+        Alert.alert(
+          "Erro no Login",
+          "Credenciais inválidas. Verifique seu email e senha."
+        );
+      }
+    },
+    onSubmitInvalid: () => {
+      Alert.alert(
+        "Campos Obrigatórios",
+        "Por favor, preencha todos os campos corretamente."
+      );
+    },
+  });
 
   return (
     <KeyboardAvoidingView
@@ -87,77 +66,113 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.innerContent}>
-          <ThemedText style={styles.title}>
-            Bem-vindo de volta
-          </ThemedText>
+          <ThemedText style={styles.title}>Bem-vindo de volta</ThemedText>
           <ThemedText style={styles.subtitle}>
             Faça login para continuar
           </ThemedText>
-          
+
           <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Email</ThemedText>
-              <Input
-                value={form.email}
-                onChangeText={(email) =>
-                  setForm((prev) => ({ ...prev, email }))
-                }
-                placeholder="seu@email.com"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                error={errors?.email}
-                isRequired
-                style={styles.input}
-                placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              />
-            </View>
-            
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Senha</ThemedText>
-              <Input
-                value={form.password}
-                onChangeText={(password) =>
-                  setForm((prev) => ({ ...prev, password }))
-                }
-                placeholder="••••••••"
-                secureTextEntry
-                autoComplete="password"
-                error={errors?.password}
-                isRequired
-                style={styles.input}
-                placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              />
-            </View>
-            
-            <Button
-              title="Entrar"
-              onPress={handleLogin}
-              isLoading={isLoading}
-              disabled={isLoading}
-              style={styles.buttonPrimary}
-              textStyle={styles.buttonPrimaryText}
-            />
-            
-            <View style={styles.linksContainer}>
-              <ThemedText style={styles.linkText}>
-                Não possui conta?{" "}
-                <ThemedText
-                  style={styles.linkHighlight}
-                  onPress={navigateToRegister}
-                >
-                  Cadastre-se
-                </ThemedText>
-              </ThemedText>
-              <ThemedText
-                style={styles.linkSecondary}
-                onPress={navigateBack}
+              {/* Campo de Email com validação */}
+              <form.Field
+                name="email"
+                validators={{
+                  onSubmit: ({ value }) => {
+                    if (!value.trim()) {
+                      return "Email é obrigatório";
+                    }
+                    if (!/\S+@\S+\.\S+/.test(value)) {
+                      return "Email inválido";
+                    }
+                    return undefined;
+                  },
+                }}
               >
-                Voltar para home
-              </ThemedText>
+                {(field) => (
+                  <View style={styles.inputGroup}>
+                    <ThemedText style={styles.inputLabel}>Email</ThemedText>
+                    <Input
+                      value={field.state.value}
+                      onChangeText={field.handleChange}
+                      onBlur={field.handleBlur}
+                      placeholder="seu@email.com"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      isRequired
+                      style={styles.input}
+                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                    />
+                  </View>
+                )}
+              </form.Field>
+
+              {/* Campo de Senha com validação */}
+              <form.Field
+                name="password"
+                validators={{
+                  onSubmit: ({ value }) => {
+                    if (!value.trim()) {
+                      return "Senha é obrigatória";
+                    }
+                    if (value.length < 6) {
+                      return "Senha deve ter pelo menos 6 caracteres";
+                    }
+                    return undefined;
+                  },
+                }}
+              >
+                {(field) => (
+                  <View style={styles.inputGroup}>
+                    <ThemedText style={styles.inputLabel}>Senha</ThemedText>
+                    <Input
+                      value={field.state.value}
+                      onChangeText={field.handleChange}
+                      onBlur={field.handleBlur}
+                      placeholder="••••••••"
+                      secureTextEntry
+                      autoComplete="password"
+                      isRequired
+                      style={styles.input}
+                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                    />
+                  </View>
+                )}
+              </form.Field>
+
+              {/* Botão de Submit com estado do formulário */}
+              <form.Subscribe
+                selector={(state) => ({
+                  isSubmitting: state.isSubmitting,
+                })}
+              >
+                {({ isSubmitting }) => (
+                  <Button
+                    title="Entrar"
+                    onPress={form.handleSubmit}
+                    isLoading={isSubmitting || isLoading}
+                    disabled={isSubmitting || isLoading}
+                    style={styles.buttonPrimary}
+                    textStyle={styles.buttonPrimaryText}
+                  />
+                )}
+              </form.Subscribe>
+
+              <View style={styles.linksContainer}>
+                <ThemedText style={styles.linkText}>
+                  Não possui conta?{" "}
+                  <ThemedText
+                    style={styles.linkHighlight}
+                    onPress={navigateToRegister}
+                  >
+                    Cadastre-se
+                  </ThemedText>
+                </ThemedText>
+                <ThemedText style={styles.linkSecondary} onPress={navigateBack}>
+                  Voltar para home
+                </ThemedText>
+              </View>
             </View>
           </View>
-        </View>
       </ScrollView>
       {isLoading && <LoadingSpinner overlay />}
     </KeyboardAvoidingView>

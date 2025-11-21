@@ -1,6 +1,7 @@
 import { formatters } from "@/utils/formatters";
+import { useForm } from "@tanstack/react-form";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -19,87 +20,45 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/providers/auth-provider";
 import { User } from "@/types";
 
-interface RegisterForm {
-  name: string;
-  email: string;
-  contact: string;
-  password: string;
-}
-
-interface FormErrors {
-  name?: string;
-  email?: string;
-  contact?: string;
-  password?: string;
-}
-
 export default function RegisterScreen() {
   const { signUp, isLoading } = useAuth();
   const insets = useSafeAreaInsets();
-  const [form, setForm] = useState<RegisterForm>({
-    name: "",
-    email: "",
-    contact: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!form.name.trim()) {
-      newErrors.name = "Nome é obrigatório";
-    } else if (form.name.trim().length < 2) {
-      newErrors.name = "Nome deve ter pelo menos 2 caracteres";
-    }
-
-    if (!form.email.trim()) {
-      newErrors.email = "Email é obrigatório";
-    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      newErrors.email = "Email inválido";
-    }
-
-    if (!form.password.trim()) {
-      newErrors.password = "Senha é obrigatória";
-    } else if (form.password.length < 6) {
-      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
-    }
-
-    if (!form.contact.trim()) {
-      newErrors.contact = "Contato é obrigatório";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleRegister = async () => {
-    if (!validateForm()) return;
-
-    try {
-      const data: User = {
-        name: form.name,
-        email: form.email,
-        contact: form.contact,
-        password: form.password,
-      };
-      await signUp(data);
-      // Navegação automática será feita pelo AuthProvider
-    } catch {
-      Alert.alert(
-        "Erro no Cadastro",
-        "Ocorreu um erro ao criar sua conta. Tente novamente."
-      );
-    }
-  };
-
-  const navigateToLogin = () => {
+  // Callbacks memoizados para navegação
+  const navigateToLogin = useCallback(() => {
     router.push("/(auth)/login");
-  };
+  }, []);
 
-  const navigateBack = () => {
+  const navigateBack = useCallback(() => {
     router.push("/(auth)/onboarding");
-  };
+  }, []);
+
+  // Inicialização do TanStack Form
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      contact: "",
+      password: "",
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const data: User = {
+          name: value.name,
+          email: value.email,
+          contact: value.contact,
+          password: value.password,
+        };
+        await signUp(data);
+        // Navegação automática será feita pelo AuthProvider
+      } catch {
+        Alert.alert(
+          "Erro no Cadastro",
+          "Ocorreu um erro ao criar sua conta. Tente novamente."
+        );
+      }
+    },
+  });
 
   return (
     <KeyboardAvoidingView
@@ -119,88 +78,169 @@ export default function RegisterScreen() {
           </ThemedText>
 
           <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Nome Completo</ThemedText>
-              <Input
-                value={form.name}
-                onChangeText={(name) => setForm((prev) => ({ ...prev, name }))}
-                placeholder="Seu nome completo"
-                autoCapitalize="words"
-                autoComplete="name"
-                error={errors.name}
-                isRequired
-                style={styles.input}
-                placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Email</ThemedText>
-              <Input
-                value={form.email}
-                onChangeText={(email) =>
-                  setForm((prev) => ({ ...prev, email }))
-                }
-                placeholder="seu@email.com"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                error={errors.email}
-                isRequired
-                style={styles.input}
-                placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Telefone</ThemedText>
-              <View style={styles.phoneContainer}>
-                <View style={styles.phonePrefix}>
-                  <ThemedText style={styles.phonePrefixText}>+55</ThemedText>
-                </View>
-                <View style={styles.phoneInputWrapper}>
+            <form.Field
+              name="name"
+              validators={{
+                onBlur: ({ value }) => {
+                  if (value.trim().length < 2) {
+                    return "Nome deve ter pelo menos 2 caracteres";
+                  }
+                  return undefined;
+                },
+              }}
+            >
+              {(field) => (
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>
+                    Nome Completo
+                  </ThemedText>
                   <Input
-                    value={form.contact.replace(/^\+55/, "")}
-                    onChangeText={(value) => {
-                      setForm((prev) => ({
-                        ...prev,
-                        contact: formatters.formatContactToBrazilE164(value),
-                      }));
-                    }}
-                    placeholder="11987654321"
-                    keyboardType="phone-pad"
-                    autoCapitalize="none"
-                    autoComplete="tel"
-                    error={errors.contact}
+                    value={field.state.value}
+                    onChangeText={field.handleChange}
+                    onBlur={field.handleBlur}
+                    placeholder="Seu nome completo"
+                    autoCapitalize="words"
+                    autoComplete="name"
                     isRequired
-                    style={styles.phoneInput}
+                    style={styles.input}
                     placeholderTextColor="rgba(255, 255, 255, 0.4)"
-                    maxLength={11}
                   />
+                  {!field.state.meta.isValid && (
+                    <ThemedText style={styles.errorText}>
+                      {field.state.meta.errors.join(", ")}
+                    </ThemedText>
+                  )}
                 </View>
-              </View>
-            </View>
+              )}
+            </form.Field>
 
-            <View style={styles.inputGroup}>
-              <ThemedText style={styles.inputLabel}>Senha</ThemedText>
-              <Input
-                value={form.password}
-                onChangeText={(password) =>
-                  setForm((prev) => ({ ...prev, password }))
-                }
-                placeholder="••••••••"
-                secureTextEntry
-                autoComplete="new-password"
-                error={errors.password}
-                isRequired
-                style={styles.input}
-                placeholderTextColor="rgba(255, 255, 255, 0.4)"
-              />
-            </View>
+            <form.Field
+              name="email"
+              validators={{
+                onBlur: ({ value }) => {
+                  if (!value.trim()) {
+                    return "Email é obrigatório";
+                  }
+                  if (!/\S+@\S+\.\S+/.test(value)) {
+                    return "Email inválido";
+                  }
+                  return undefined;
+                },
+              }}
+            >
+              {(field) => (
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>Email</ThemedText>
+                  <Input
+                    value={field.state.value}
+                    onChangeText={field.handleChange}
+                    onBlur={field.handleBlur}
+                    placeholder="seu@email.com"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    isRequired
+                    style={styles.input}
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                  />
+                  {!field.state.meta.isValid && (
+                    <ThemedText style={styles.errorText}>
+                      {field.state.meta.errors.join(", ")}
+                    </ThemedText>
+                  )}
+                </View>
+              )}
+            </form.Field>
+
+            <form.Field
+              name="contact"
+              validators={{
+                onBlur: ({ value }) => {
+                  if (!value.trim()) {
+                    return "Contato é obrigatório";
+                  }
+                  return undefined;
+                },
+              }}
+            >
+              {(field) => (
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>Telefone</ThemedText>
+                  <View style={styles.phoneContainer}>
+                    <View style={styles.phonePrefix}>
+                      <ThemedText style={styles.phonePrefixText}>
+                        +55
+                      </ThemedText>
+                    </View>
+                    <View style={styles.phoneInputWrapper}>
+                      <Input
+                        value={field.state.value.replace(/^\+55/, "")}
+                        onChangeText={(value) => {
+                          field.handleChange(
+                            formatters.formatContactToBrazilE164(value)
+                          );
+                        }}
+                        onBlur={field.handleBlur}
+                        placeholder="11987654321"
+                        keyboardType="phone-pad"
+                        autoCapitalize="none"
+                        autoComplete="tel"
+                        isRequired
+                        style={styles.phoneInput}
+                        placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                        maxLength={11}
+                      />
+                    </View>
+                  </View>
+                  {!field.state.meta.isValid && (
+                    <ThemedText style={styles.errorText}>
+                      {field.state.meta.errors.join(", ")}
+                    </ThemedText>
+                  )}
+                </View>
+              )}
+            </form.Field>
+
+            <form.Field
+              name="password"
+              validators={{
+                onBlur: ({ value }) => {
+                  if (!value.trim()) {
+                    return "Senha é obrigatória";
+                  }
+                  if (value.length < 6) {
+                    return "Senha deve ter pelo menos 6 caracteres";
+                  }
+                  return undefined;
+                },
+              }}
+            >
+              {(field) => (
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>Senha</ThemedText>
+                  <Input
+                    value={field.state.value}
+                    onChangeText={field.handleChange}
+                    onBlur={field.handleBlur}
+                    placeholder="••••••••"
+                    secureTextEntry
+                    autoComplete="new-password"
+                    isRequired
+                    style={styles.input}
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                  />
+                  {!field.state.meta.isValid && (
+                    <ThemedText style={styles.errorText}>
+                      {field.state.meta.errors.join(", ")}
+                    </ThemedText>
+                  )}
+                </View>
+              )}
+            </form.Field>
 
             <Button
               title="Criar Conta"
-              onPress={handleRegister}
+              onPress={form.handleSubmit}
               isLoading={isLoading}
               disabled={isLoading}
               style={styles.buttonPrimary}
@@ -214,7 +254,7 @@ export default function RegisterScreen() {
               ]}
             >
               <ThemedText style={styles.linkText}>
-                Já possui conta?{" "}
+                Já possui conta?
                 <ThemedText
                   style={styles.linkHighlight}
                   onPress={navigateToLogin}
@@ -285,6 +325,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     color: "#fff",
+  },
+  errorText: {
+    color: "#FF6B6B",
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: Platform.OS === "ios" ? "500" : "normal",
   },
   phoneContainer: {
     flexDirection: "row",
