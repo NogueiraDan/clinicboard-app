@@ -2,7 +2,6 @@ import { CalendarSection } from "@/components/appointments/calendar-section";
 import { CustomDrawer } from "@/components/drawer/custom-drawer";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Button } from "@/components/ui/button";
 import { useAppointments } from "@/hooks/tanstack/use-appointments";
 import { Notification } from "@/types";
 import { fetchNotifications, getUnreadCount } from "@/utils/mocks/notifications";
@@ -115,7 +114,7 @@ export default function DashboardScreen() {
         />
 
         {/* Action Buttons */}
-        <View style={styles.actionButtons}>
+        {/* <View style={styles.actionButtons}>
           <Button
             title="Ver Todos os Pacientes"
             onPress={navigateToPatientsList}
@@ -123,7 +122,7 @@ export default function DashboardScreen() {
             textStyle={styles.buttonPrimaryText}
             variant="primary"
           />
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* FAB - Floating Action Button para Novo Agendamento */}
