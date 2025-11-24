@@ -29,9 +29,9 @@ export default function DashboardScreen() {
     loadNotifications();
   }, []);
 
-  const navigateToPatientsList = React.useCallback(() => {
-    router.push("/(app)/(tabs)/patients");
-  }, []);
+  // const navigateToPatientsList = React.useCallback(() => {
+  //   router.push("/(app)/(tabs)/patients");
+  // }, []);
 
   const navigateToNewAppointment = React.useCallback(() => {
     router.push("/(app)/new-appointment");
