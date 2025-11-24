@@ -25,7 +25,18 @@ export const businessService = {
     return data;
   },
 
-  findAppointmentByDate: async (user_id: string, date: string): Promise<Appointment[]> => {
+  createAppointment: async (appointment: Appointment): Promise<Appointment> => {
+    const { data } = await api.post<Appointment>(
+      API_ENDPOINTS.BUSINESS_SERVICE.CREATE_APPOINTMENT,
+      appointment
+    );
+    return data;
+  },
+
+  findAppointmentByDate: async (
+    user_id: string,
+    date: string
+  ): Promise<Appointment[]> => {
     const { data } = await api.get<Appointment[]>(
       API_ENDPOINTS.BUSINESS_SERVICE.FIND_APPOINTMENT_BY_DATE(user_id, date)
     );

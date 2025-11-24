@@ -37,14 +37,14 @@ export type User = {
   contact: string;
 };
 
-enum AppointmentType {
+export enum AppointmentType {
   MARCACAO = 'MARCACAO',
   REMARCACAO = 'REMARCACAO',
   CANCELAMENTO = 'CANCELAMENTO',
 }
 
 export interface Appointment {
-  id: string;
+  id?: string;
   date: string;
   hour: string;
   type: AppointmentType;

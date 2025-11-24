@@ -1,10 +1,13 @@
 import { CalendarSection } from "@/components/appointments/calendar-section";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/ui/button";
-import { Select, SelectOption } from "@/components/ui/select";
+import { Select } from "@/components/ui/select";
 import { useAppointments } from "@/hooks/tanstack/use-appointments";
+import { useCreateAppointment } from "@/hooks/tanstack/use-create-appointment";
 import { usePatients } from "@/hooks/tanstack/use-patients";
-import { AVAILABLE_TIMES, MOCK_PATIENTS } from "@/utils/mocks";
+import { useAuth } from "@/providers/auth-provider";
+import { Appointment, AppointmentType } from "@/types";
+import { AVAILABLE_TIMES } from "@/utils/mocks";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -19,67 +22,37 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-
 export default function NewAppointmentScreen() {
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string>(
     () => new Date().toISOString().split("T")[0]
   );
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null
+  );
 
-  const { appointments, isFetching: isFetchingAppointments } = useAppointments(selectedDate);
-  const { patients: apiPatients, isFetching: isFetchingPatients, error } = usePatients();
-    const insets = useSafeAreaInsets();
-
-  // TEMPORÁRIO: Usar mock quando API não retornar pacientes (Neon fora do ar)
-  const patients = apiPatients && apiPatients.length > 0 ? apiPatients : MOCK_PATIENTS;
-  React.useEffect(() => {
-    if (patients === MOCK_PATIENTS) {
-      console.log("⚠️ Usando MOCK_PATIENTS (Neon fora do ar)");
-    }
-  }, [patients, isFetchingPatients, error]);
+  const { appointments, isFetching: isFetchingAppointments } =
+    useAppointments(selectedDate);
+  const { patients, isFetching: isFetchingPatients } = usePatients();
+  const { createAppointment, isPending } = useCreateAppointment();
+  const insets = useSafeAreaInsets();
 
   // Filtrar horários disponíveis (remover os que já têm agendamento)
   const availableTimes = useMemo(() => {
-    if (!appointments) return AVAILABLE_TIMES;
-    
-    const bookedTimes = appointments.map(apt => {
-      const date = new Date(apt.date);
-      return `${date.getHours().toString().padStart(2, '0')}:00`;
-    });
-    
-    return AVAILABLE_TIMES.filter(time => !bookedTimes.includes(time));
+    if (!appointments || appointments.length === 0) return AVAILABLE_TIMES;
+
+    const bookedTimes = appointments.map((apt) => apt.hour);
+
+    return AVAILABLE_TIMES.filter((time) => !bookedTimes.includes(time));
   }, [appointments]);
-
-  // Opções de horário para o Select
-  const timeOptions: SelectOption[] = useMemo(() => {
-    return availableTimes.map(time => ({
-      label: time,
-      value: time,
-    }));
-  }, [availableTimes]);
-
-  // Opções de pacientes para o Select
-  const patientOptions: SelectOption[] = useMemo(() => {
-    if (!patients || patients.length === 0) return [];
-    return patients
-      .map(patient => ({
-        label: patient.name,
-        value: patient.id || "",
-      }))
-      .filter(opt => opt.value !== "");
-  }, [patients]);
-
-  const selectedPatient = useMemo(() => {
-    return patients?.find(p => p.id === selectedPatientId);
-  }, [patients, selectedPatientId]);
 
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
-    setSelectedTime(null); // Reset time when date changes
+    setSelectedTime(null);
   };
 
-  const handleCreateAppointment = () => {
+  const handleCreateAppointment = async (): Promise<void> => {
     if (!selectedDate || !selectedTime || !selectedPatientId) {
       Alert.alert(
         "Dados incompletos",
@@ -88,32 +61,35 @@ export default function NewAppointmentScreen() {
       return;
     }
 
-    // TODO: Implementar criação do agendamento
-    const patientName = selectedPatient?.name || "Desconhecido";
-    Alert.alert(
-      "Agendamento Criado!",
-      `Paciente: ${patientName}\nID: ${selectedPatientId}\nData: ${selectedDate}\nHorário: ${selectedTime}`,
-      [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]
-    );
+    const payload: Appointment = {
+      patient_id: selectedPatientId,
+      date: selectedDate,
+      hour: selectedTime,
+      type: AppointmentType.MARCACAO,
+      user_id: user?.id || "",
+    };
+
+    console.log("📤 Payload de agendamento:", payload);
+
+    // React Query já trata erros via onError do hook
+    await createAppointment(payload);
   };
 
   const currentMonthYear = useMemo(() => {
     const dateObj = new Date(selectedDate);
-    return dateObj.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    return dateObj.toLocaleDateString("pt-BR", {
+      month: "long",
+      year: "numeric",
+    });
   }, [selectedDate]);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
@@ -123,15 +99,13 @@ export default function NewAppointmentScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* Month/Year Title */}
-        <ThemedText style={styles.monthTitle}>
-          {currentMonthYear}
-        </ThemedText>
+        <ThemedText style={styles.monthTitle}>{currentMonthYear}</ThemedText>
 
         {/* Calendar Section */}
         <CalendarSection
@@ -145,14 +119,21 @@ export default function NewAppointmentScreen() {
           <ThemedText style={styles.sectionTitle}>HORÁRIO</ThemedText>
           {availableTimes.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="time-outline" size={32} color="rgba(255, 255, 255, 0.3)" />
+              <Ionicons
+                name="time-outline"
+                size={32}
+                color="rgba(255, 255, 255, 0.3)"
+              />
               <ThemedText style={styles.emptyText}>
                 Nenhum horário disponível nesta data
               </ThemedText>
             </View>
           ) : (
             <Select
-              options={timeOptions}
+              options={availableTimes.map((time) => ({
+                label: time,
+                value: time,
+              }))}
               value={selectedTime}
               onValueChange={setSelectedTime}
               placeholder="Selecione o horário"
@@ -165,24 +146,37 @@ export default function NewAppointmentScreen() {
           <ThemedText style={styles.sectionTitle}>PACIENTE</ThemedText>
           {isFetchingPatients ? (
             <View style={styles.loadingState}>
-              <Ionicons name="hourglass-outline" size={32} color="rgba(255, 255, 255, 0.3)" />
-              <ThemedText style={styles.loadingText}>Carregando pacientes...</ThemedText>
+              <Ionicons
+                name="hourglass-outline"
+                size={32}
+                color="rgba(255, 255, 255, 0.3)"
+              />
+              <ThemedText style={styles.loadingText}>
+                Carregando pacientes...
+              </ThemedText>
             </View>
-          ) : patientOptions.length > 0 ? (
+          ) : patients.length > 0 ? (
             <>
               <Select
-                options={patientOptions}
+                options={patients.map((patient) => ({
+                  label: patient.name,
+                  value: patient.id || "",
+                }))}
                 value={selectedPatientId}
                 onValueChange={setSelectedPatientId}
                 placeholder="Selecione o paciente"
               />
               <ThemedText style={styles.helperText}>
-                {patientOptions.length} paciente(s) disponível(is)
+                {patients.length} paciente(s) disponível(is)
               </ThemedText>
             </>
           ) : (
             <View style={styles.emptyState}>
-              <Ionicons name="people-outline" size={32} color="rgba(255, 255, 255, 0.3)" />
+              <Ionicons
+                name="people-outline"
+                size={32}
+                color="rgba(255, 255, 255, 0.3)"
+              />
               <ThemedText style={styles.emptyText}>
                 Nenhum paciente cadastrado
               </ThemedText>
@@ -197,14 +191,20 @@ export default function NewAppointmentScreen() {
         </View>
 
         {/* Botão de Criar Agendamento */}
-        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View
+          style={[
+            styles.footer,
+            { paddingBottom: Math.max(insets.bottom, 16) },
+          ]}
+        >
           <Button
-            title="Criar Agendamento"
+            title={isPending ? "Criando..." : "Criar Agendamento"}
             onPress={handleCreateAppointment}
             disabled={!selectedDate || !selectedTime || !selectedPatientId}
             style={[
               styles.createButton,
-              (!selectedDate || !selectedTime || !selectedPatientId) && styles.createButtonDisabled,
+              (!selectedDate || !selectedTime || !selectedPatientId) &&
+                styles.createButtonDisabled,
             ]}
             textStyle={styles.createButtonText}
           />
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textTransform: "capitalize",
     letterSpacing: 0.5,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   section: {
     marginTop: 32,

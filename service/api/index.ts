@@ -41,9 +41,10 @@ const api = axios.create({
 // Interceptor para logging (REMOVER EM PRODUÇÃO)
 api.interceptors.request.use(
   (config) => {
+    const timestamp = new Date().toISOString();
     console.log(
-      `📡 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${
-        config.url
+      `📡 [${timestamp}] API Request: ${config.method?.toUpperCase()} ${config.baseURL}${
+      config.url
       }`
     );
     return config;
@@ -56,7 +57,10 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+    const timestamp = new Date().toISOString();
+      console.log(
+        `✅ [${timestamp}] API Response: ${response.status} ${response.config.url}`
+      );
     return response;
   },
   (error) => {

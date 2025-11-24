@@ -7,20 +7,23 @@ const TanstackQueryProvider = ({ children }: { children: React.ReactNode }) => {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5000,
-            refetchOnWindowFocus: false,
-            retry: false,
-            gcTime: 10 * 60 * 1000, // 10 minutes
+            staleTime: 2 * 60 * 1000, // ⬆️ 2min (era 5s)
+            gcTime: 10 * 60 * 1000, // ✅ Mantém 10min
+            refetchOnWindowFocus: false, // ✅ Já correto
+            refetchOnMount: false, // ✨ NOVO - evita re-fetch desnecessário
+            retry: 1, // ⬆️ 1 retry (era 0)
+            retryDelay: (attemptIndex) =>
+              Math.min(1000 * 2 ** attemptIndex, 30000), // ✨ Exponential backoff
           },
-          mutations: {},
+          mutations: {
+            retry: 1, // ✨ NOVO - retry em mutations
+          },
         },
       })
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
