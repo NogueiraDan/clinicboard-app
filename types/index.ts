@@ -51,3 +51,12 @@ export interface Appointment {
   user_id: string;
   patient_id: string;
 }
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'appointment' | 'reminder' | 'system';
+  isRead: boolean;
+  createdAt: string;
+}

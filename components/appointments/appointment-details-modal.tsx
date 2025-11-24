@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { usePatient } from "@/hooks/tanstack/use-patient";
 import { Appointment } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React from "react";
 import {
   Modal,
@@ -24,15 +23,9 @@ export const AppointmentDetailsModal: React.FC<
   AppointmentDetailsModalProps
 > = ({ visible, appointment, onClose }) => {
   const { patient } = usePatient(appointment?.patient_id || "");
-  const handleViewPatient = React.useCallback(() => {
-    if (appointment?.patient_id) {
-      onClose();
-      router.push(`/(app)/patient-details/${appointment.patient_id}`);
-    }
-  }, [appointment, onClose]);
-
-  const handleCancelAppointment = React.useCallback(() => {
-    // TODO: Implementar cancelamento de agendamento
+  
+  const handleDeleteAppointment = React.useCallback(() => {
+    // TODO: Implementar exclusão de agendamento
     onClose();
   }, [onClose]);
 
@@ -169,14 +162,14 @@ export const AppointmentDetailsModal: React.FC<
               {/* Actions */}
               <View style={styles.actions}>
                 <Button
-                  title="Ver Paciente"
-                  onPress={handleViewPatient}
-                  style={styles.primaryButton}
-                  textStyle={styles.primaryButtonText}
+                  title="Fechar"
+                  onPress={onClose}
+                  style={styles.secondaryButton}
+                  textStyle={styles.secondaryButtonText}
                 />
                 <Button
-                  title="Cancelar"
-                  onPress={handleCancelAppointment}
+                  title="Excluir"
+                  onPress={handleDeleteAppointment}
                   style={styles.dangerButton}
                   textStyle={styles.dangerButtonText}
                 />
@@ -291,38 +284,39 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
   actions: {
+    flexDirection: 'row',
     paddingHorizontal: 24,
     paddingTop: 24,
     paddingBottom: Platform.OS === "ios" ? 34 : 16,
     gap: 12,
   },
-  primaryButton: {
-    backgroundColor: "#5B67CA",
+  secondaryButton: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
     borderRadius: 16,
     paddingVertical: 16,
-    shadowColor: "#5B67CA",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
-  primaryButtonText: {
-    color: "#fff",
+  secondaryButtonText: {
+    color: "rgba(255, 255, 255, 0.9)",
     fontWeight: Platform.OS === "ios" ? "600" : "bold",
     fontSize: 16,
     letterSpacing: 0.5,
   },
   dangerButton: {
-    backgroundColor: "rgba(255, 59, 48, 0.1)",
+    flex: 1,
+    backgroundColor: "#FF3B30",
     borderRadius: 16,
     paddingVertical: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255, 59, 48, 0.3)",
-    width: "50%",
-    alignSelf: "center",
+    shadowColor: "#FF3B30",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   dangerButtonText: {
-    color: "#FF3B30",
+    color: "#fff",
     fontWeight: Platform.OS === "ios" ? "600" : "bold",
     fontSize: 16,
     letterSpacing: 0.5,

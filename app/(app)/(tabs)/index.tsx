@@ -1,8 +1,11 @@
 import { CalendarSection } from "@/components/appointments/calendar-section";
+import { CustomDrawer } from "@/components/drawer/custom-drawer";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Button } from "@/components/ui/button";
 import { useAppointments } from "@/hooks/tanstack/use-appointments";
+import { Notification } from "@/types";
+import { fetchNotifications, getUnreadCount } from "@/utils/mocks/notifications";
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import React from "react";
@@ -12,9 +15,20 @@ export default function DashboardScreen() {
   const [date, setDate] = React.useState<string>(
     () => new Date().toISOString().split("T")[0]
   );
+  const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const [drawerVisible, setDrawerVisible] = React.useState(false);
 
   const { appointments, refetchAppointments, isFetching } =
     useAppointments(date);
+
+  // Carrega notificações ao montar o componente
+  React.useEffect(() => {
+    const loadNotifications = async () => {
+      const data = await fetchNotifications();
+      setNotifications(data);
+    };
+    loadNotifications();
+  }, []);
 
   const navigateToPatientsList = React.useCallback(() => {
     router.push("/(app)/(tabs)/patients");
@@ -22,6 +36,18 @@ export default function DashboardScreen() {
 
   const navigateToNewAppointment = React.useCallback(() => {
     router.push("/(app)/new-appointment");
+  }, []);
+
+  const navigateToNotifications = React.useCallback(() => {
+    router.push("/(app)/notifications");
+  }, []);
+
+  const toggleDrawer = React.useCallback(() => {
+    setDrawerVisible((prev) => !prev);
+  }, []);
+
+  const closeDrawer = React.useCallback(() => {
+    setDrawerVisible(false);
   }, []);
 
   const handleDateSelect = React.useCallback(
@@ -37,14 +63,37 @@ export default function DashboardScreen() {
     return dateObj.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   }, [date]);
 
+  const unreadNotificationsCount = React.useMemo(
+    () => getUnreadCount(notifications),
+    [notifications]
+  );
+
   return (
     <ThemedView style={styles.container}>
       <StatusBar barStyle="light-content" />
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerIcon}>
+        <TouchableOpacity
+          style={styles.headerIcon}
+          onPress={toggleDrawer}
+          activeOpacity={0.7}
+        >
           <Ionicons name="menu" size={28} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.headerIcon}
+          onPress={navigateToNotifications}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="notifications-outline" size={28} color="#fff" />
+          {unreadNotificationsCount > 0 && (
+            <View style={styles.notificationBadge}>
+              <ThemedText style={styles.notificationBadgeText}>
+                {unreadNotificationsCount > 99 ? "99+" : unreadNotificationsCount}
+              </ThemedText>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -85,6 +134,9 @@ export default function DashboardScreen() {
       >
         <Ionicons name="calendar" size={28} color="#fff" />
       </TouchableOpacity>
+
+      {/* Drawer Navigation */}
+      <CustomDrawer visible={drawerVisible} onClose={closeDrawer} />
     </ThemedView>
   );
 }
@@ -109,6 +161,26 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.08)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#FF3B30",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
+    borderWidth: 2,
+    borderColor: "#0A0E27",
+  },
+  notificationBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: Platform.OS === "ios" ? "700" : "bold",
+    lineHeight: 14,
   },
   addButton: {
     width: 44,
