@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from "@/components/themed-text";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/providers/auth-provider";
+import { router } from "expo-router";
 
 interface ProfileOptionProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -88,10 +89,7 @@ export default function ProfileScreen() {
   }, []);
 
   const handleNotifications = useCallback(() => {
-    Alert.alert(
-      "Em desenvolvimento",
-      "Esta funcionalidade estará disponível em breve."
-    );
+    router.push("/(app)/notifications");
   }, []);
 
   const handlePrivacy = useCallback(() => {

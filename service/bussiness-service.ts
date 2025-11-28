@@ -42,4 +42,10 @@ export const businessService = {
     );
     return data;
   },
+
+  deleteAppointment: async (appointmentId: string): Promise<void> => {
+    await api.delete(
+      API_ENDPOINTS.BUSINESS_SERVICE.DELETE_APPOINTMENT(appointmentId)
+    );
+  },
 };

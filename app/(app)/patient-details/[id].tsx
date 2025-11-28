@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo } from "react";
 import {
@@ -48,7 +48,9 @@ const ActionButton = React.memo<ActionButtonProps>(
         <View style={styles.actionIconContainer}>
           <Ionicons name={icon} size={24} color={buttonColors.text} />
         </View>
-        <ThemedText style={[styles.actionButtonText, { color: buttonColors.text }]}>
+        <ThemedText
+          style={[styles.actionButtonText, { color: buttonColors.text }]}
+        >
           {title}
         </ThemedText>
       </TouchableOpacity>
@@ -118,10 +120,7 @@ export default function PatientDetailsScreen() {
   // }, [patient?.emergencyContact.phone]);
 
   const handleScheduleAppointment = useCallback(() => {
-    Alert.alert(
-      "Em desenvolvimento",
-      "A funcionalidade de agendamento estará disponível em breve."
-    );
+    router.push("/(app)/new-appointment");
   }, []);
 
   const handleDeletePatient = useCallback(() => {
@@ -157,7 +156,7 @@ export default function PatientDetailsScreen() {
     return (
       <ThemedView style={styles.container}>
         <StatusBar barStyle="light-content" />
-        
+
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
@@ -186,7 +185,7 @@ export default function PatientDetailsScreen() {
   return (
     <ThemedView style={styles.container}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
@@ -237,22 +236,26 @@ export default function PatientDetailsScreen() {
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
             <Ionicons name="person-circle" size={24} color="#5B67CA" />
-            <ThemedText style={styles.infoTitle}>Informações Pessoais</ThemedText>
+            <ThemedText style={styles.infoTitle}>
+              Informações Pessoais
+            </ThemedText>
           </View>
-          
+
           <View style={styles.infoRow}>
             <ThemedText style={styles.infoLabel}>Nome Completo</ThemedText>
             <ThemedText style={styles.infoValue}>{patient.name}</ThemedText>
           </View>
-          
+
           <View style={styles.infoRow}>
             <ThemedText style={styles.infoLabel}>Email</ThemedText>
             <ThemedText style={styles.infoValue}>{patient.email}</ThemedText>
           </View>
-          
+
           <View style={styles.infoRow}>
             <ThemedText style={styles.infoLabel}>Telefone</ThemedText>
-            <ThemedText style={styles.infoValue}>{formattedData?.phone || ""}</ThemedText>
+            <ThemedText style={styles.infoValue}>
+              {formattedData?.phone || ""}
+            </ThemedText>
           </View>
         </View>
 

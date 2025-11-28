@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@/components/ui/button";
+import { useDeleteAppointment } from "@/hooks/tanstack/use-delete-appointment";
 import { usePatient } from "@/hooks/tanstack/use-patient";
 import { Appointment } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,11 +24,12 @@ export const AppointmentDetailsModal: React.FC<
   AppointmentDetailsModalProps
 > = ({ visible, appointment, onClose }) => {
   const { patient } = usePatient(appointment?.patient_id || "");
+  const { deleteAppointment } = useDeleteAppointment();
   
-  const handleDeleteAppointment = React.useCallback(() => {
-    // TODO: Implementar exclusão de agendamento
+  const handleDeleteAppointment = React.useCallback((appointmentId: string) => {
+    deleteAppointment(appointmentId);
     onClose();
-  }, [onClose]);
+  }, [deleteAppointment, onClose]);
 
   const appointmentDate = React.useMemo(() => {
     if (!appointment?.date) return "";
@@ -169,7 +171,7 @@ export const AppointmentDetailsModal: React.FC<
                 />
                 <Button
                   title="Excluir"
-                  onPress={handleDeleteAppointment}
+                  onPress={() => appointment.id && handleDeleteAppointment(appointment.id)}
                   style={styles.dangerButton}
                   textStyle={styles.dangerButtonText}
                 />

@@ -6,12 +6,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import {
-    FlatList,
-    Platform,
-    StatusBar,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function NotificationsScreen() {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingTop: 80,
     paddingBottom: 16,
     gap: 12,
   },
